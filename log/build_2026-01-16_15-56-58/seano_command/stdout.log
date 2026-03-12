@@ -1,0 +1,35 @@
+running egg_info
+creating ../../build/seano_command/seano_command.egg-info
+writing ../../build/seano_command/seano_command.egg-info/PKG-INFO
+writing dependency_links to ../../build/seano_command/seano_command.egg-info/dependency_links.txt
+writing entry points to ../../build/seano_command/seano_command.egg-info/entry_points.txt
+writing requirements to ../../build/seano_command/seano_command.egg-info/requires.txt
+writing top-level names to ../../build/seano_command/seano_command.egg-info/top_level.txt
+writing manifest file '../../build/seano_command/seano_command.egg-info/SOURCES.txt'
+reading manifest file '../../build/seano_command/seano_command.egg-info/SOURCES.txt'
+writing manifest file '../../build/seano_command/seano_command.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/seano/Seano_ws/build/seano_command/build
+creating /home/seano/Seano_ws/build/seano_command/build/lib
+creating /home/seano/Seano_ws/build/seano_command/build/lib/seano_command
+copying seano_command/command_node.py -> /home/seano/Seano_ws/build/seano_command/build/lib/seano_command
+copying seano_command/__init__.py -> /home/seano/Seano_ws/build/seano_command/build/lib/seano_command
+running install
+running install_lib
+creating /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command
+copying /home/seano/Seano_ws/build/seano_command/build/lib/seano_command/command_node.py -> /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command
+copying /home/seano/Seano_ws/build/seano_command/build/lib/seano_command/__init__.py -> /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command
+byte-compiling /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command/command_node.py to command_node.cpython-310.pyc
+byte-compiling /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/seano/Seano_ws/install/seano_command/share/ament_index
+creating /home/seano/Seano_ws/install/seano_command/share/ament_index/resource_index
+creating /home/seano/Seano_ws/install/seano_command/share/ament_index/resource_index/packages
+copying resource/seano_command -> /home/seano/Seano_ws/install/seano_command/share/ament_index/resource_index/packages
+copying package.xml -> /home/seano/Seano_ws/install/seano_command/share/seano_command
+running install_egg_info
+Copying ../../build/seano_command/seano_command.egg-info to /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command-0.0.0-py3.10.egg-info
+running install_scripts
+Installing command_node script to /home/seano/Seano_ws/install/seano_command/lib/seano_command
+writing list of installed files to '/home/seano/Seano_ws/build/seano_command/install.log'

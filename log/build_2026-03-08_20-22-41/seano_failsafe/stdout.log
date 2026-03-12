@@ -1,0 +1,31 @@
+running egg_info
+writing ../../build/seano_failsafe/seano_failsafe.egg-info/PKG-INFO
+writing dependency_links to ../../build/seano_failsafe/seano_failsafe.egg-info/dependency_links.txt
+writing entry points to ../../build/seano_failsafe/seano_failsafe.egg-info/entry_points.txt
+writing requirements to ../../build/seano_failsafe/seano_failsafe.egg-info/requires.txt
+writing top-level names to ../../build/seano_failsafe/seano_failsafe.egg-info/top_level.txt
+reading manifest file '../../build/seano_failsafe/seano_failsafe.egg-info/SOURCES.txt'
+writing manifest file '../../build/seano_failsafe/seano_failsafe.egg-info/SOURCES.txt'
+running build
+running build_py
+copying seano_failsafe/seano_communication_monitor.py -> /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe
+copying seano_failsafe/seano_failsafe.py -> /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe
+copying seano_failsafe/seano_battery.py -> /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe
+running install
+running install_lib
+copying /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe/seano_communication_monitor.py -> /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe
+copying /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe/seano_failsafe.py -> /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe
+copying /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe/seano_battery.py -> /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe
+byte-compiling /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe/seano_communication_monitor.py to seano_communication_monitor.cpython-310.pyc
+byte-compiling /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe/seano_failsafe.py to seano_failsafe.cpython-310.pyc
+byte-compiling /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe/seano_battery.py to seano_battery.cpython-310.pyc
+running install_data
+copying package.xml -> /home/seano/Seano_ws/install/seano_failsafe/share/seano_failsafe
+running install_egg_info
+removing '/home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/seano_failsafe/seano_failsafe.egg-info to /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe-0.0.0-py3.10.egg-info
+running install_scripts
+Installing seano_battery script to /home/seano/Seano_ws/install/seano_failsafe/lib/seano_failsafe
+Installing seano_communication_monitor script to /home/seano/Seano_ws/install/seano_failsafe/lib/seano_failsafe
+Installing seano_failsafe script to /home/seano/Seano_ws/install/seano_failsafe/lib/seano_failsafe
+writing list of installed files to '/home/seano/Seano_ws/build/seano_failsafe/install.log'

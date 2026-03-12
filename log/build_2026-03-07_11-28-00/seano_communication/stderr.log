@@ -1,0 +1,5 @@
+  File "/home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages/seano_communication/communication_node.py", line 107
+    socket.getaddrinfo = custom_getaddrinf, bandwidth and switch if necessary.
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: expected 'else' after 'if' expression
+

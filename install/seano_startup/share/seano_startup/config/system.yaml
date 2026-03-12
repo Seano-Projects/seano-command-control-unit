@@ -1,0 +1,78 @@
+/**:
+  ros__parameters:
+
+    system:
+      name: USV-SEANO
+      version: 1.0
+      mode: field_test
+
+    vehicle:
+      id: USV-001
+      type: usv
+      frame: catamaran
+
+    features:
+      autopilot: true
+      ocean_sensors: true
+      logging: true
+      mqtt: true
+      failsafe: true
+      collision_avoidance: true
+      anti_theft: true
+
+    network:
+      preferred: wifi
+      fallback:
+        - gsm
+        - starlink
+
+    communication:
+      gsm_interface: wwan0
+      wifi_interface: wlP1p1s0
+      ethernet_interface: enP8p1s0
+      ping_target: 8.8.8.8
+      speed_test_url: http://speedtest.tele2.net/100MB.zip
+      latency_threshold: 200.0
+      bandwidth_threshold: 1.0
+      check_interval: 5.0
+
+    logging:
+      enable: true
+      path: /data/logs
+      format: csv
+
+    mqtt:
+      broker: mqtt.seano.cloud
+      port: 8883
+      username: seanomqtt
+      password: "Seano2025*"
+      qos: 1
+      base_topic: seano
+      keepalive: 60
+      heartbeat_interval: 30.0
+
+    failsafe:
+      battery:
+        serial_port: /dev/ttyTHS0
+        baudrate: 115200
+        check_interval: 1.0
+        min_voltage: 10.5
+        max_voltage: 12.6
+        low_voltage_threshold: 11.1
+        critical_voltage_threshold: 10.8
+      communication:
+        check_interval: 2.0
+        wifi_interface: wlP1p1s0
+        gsm_interface: wwan0
+        ethernet_interface: enP8p1s0
+        wifi_rssi_warning: -70.0
+        wifi_rssi_critical: -80.0
+        gsm_signal_warning: 15.0
+        gsm_signal_critical: 10.0
+        consecutive_failures: 3
+      system:
+        battery_failsafe_enabled: true
+        communication_failsafe_enabled: true
+        failsafe_mode: RTL
+        notification_delay: 2.0
+        recovery_delay: 10.0

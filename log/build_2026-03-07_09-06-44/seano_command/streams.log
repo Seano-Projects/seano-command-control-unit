@@ -1,0 +1,36 @@
+[5.642s] Invoking command in '/home/seano/Seano_ws/build/seano_command': PYTHONPATH=/home/seano/Seano_ws/build/seano_command/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/seano/Seano_ws/build/seano_command/build
+[6.447s] running develop
+[6.954s] Removing /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano-command.egg-link (link to .)
+[7.148s] Invoked command in '/home/seano/Seano_ws/build/seano_command' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_command/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/seano/Seano_ws/build/seano_command/build
+[7.154s] Invoking command in '/home/seano/Seano_ws/src/seano_command': PYTHONPATH=/home/seano/Seano_ws/build/seano_command/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_command build --build-base /home/seano/Seano_ws/build/seano_command/build install --record /home/seano/Seano_ws/build/seano_command/install.log --single-version-externally-managed install_data --force
+[7.890s] running egg_info
+[7.892s] writing ../../build/seano_command/seano_command.egg-info/PKG-INFO
+[7.893s] writing dependency_links to ../../build/seano_command/seano_command.egg-info/dependency_links.txt
+[7.894s] writing entry points to ../../build/seano_command/seano_command.egg-info/entry_points.txt
+[7.894s] writing requirements to ../../build/seano_command/seano_command.egg-info/requires.txt
+[7.895s] writing top-level names to ../../build/seano_command/seano_command.egg-info/top_level.txt
+[7.903s] reading manifest file '../../build/seano_command/seano_command.egg-info/SOURCES.txt'
+[7.906s] writing manifest file '../../build/seano_command/seano_command.egg-info/SOURCES.txt'
+[7.907s] running build
+[7.908s] running build_py
+[7.908s] creating /home/seano/Seano_ws/build/seano_command/build
+[7.908s] creating /home/seano/Seano_ws/build/seano_command/build/lib
+[7.908s] creating /home/seano/Seano_ws/build/seano_command/build/lib/seano_command
+[7.909s] copying seano_command/command_node.py -> /home/seano/Seano_ws/build/seano_command/build/lib/seano_command
+[7.909s] copying seano_command/__init__.py -> /home/seano/Seano_ws/build/seano_command/build/lib/seano_command
+[7.909s] running install
+[7.910s] running install_lib
+[7.913s] creating /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command
+[7.913s] copying /home/seano/Seano_ws/build/seano_command/build/lib/seano_command/command_node.py -> /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command
+[7.913s] copying /home/seano/Seano_ws/build/seano_command/build/lib/seano_command/__init__.py -> /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command
+[7.916s] byte-compiling /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command/command_node.py to command_node.cpython-310.pyc
+[7.922s] byte-compiling /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command/__init__.py to __init__.cpython-310.pyc
+[7.923s] running install_data
+[7.923s] copying resource/seano_command -> /home/seano/Seano_ws/install/seano_command/share/ament_index/resource_index/packages
+[7.924s] copying package.xml -> /home/seano/Seano_ws/install/seano_command/share/seano_command
+[7.924s] running install_egg_info
+[7.931s] Copying ../../build/seano_command/seano_command.egg-info to /home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages/seano_command-0.0.0-py3.10.egg-info
+[7.940s] running install_scripts
+[8.021s] Installing command_node script to /home/seano/Seano_ws/install/seano_command/lib/seano_command
+[8.022s] writing list of installed files to '/home/seano/Seano_ws/build/seano_command/install.log'
+[8.192s] Invoked command in '/home/seano/Seano_ws/src/seano_command' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_command/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_command build --build-base /home/seano/Seano_ws/build/seano_command/build install --record /home/seano/Seano_ws/build/seano_command/install.log --single-version-externally-managed install_data --force

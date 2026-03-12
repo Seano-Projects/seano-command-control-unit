@@ -1,0 +1,128 @@
+[0.695s] DEBUG:colcon:Command line arguments: ['/usr/bin/colcon', 'build']
+[0.695s] DEBUG:colcon:Parsed command line arguments: Namespace(log_base=None, log_level=None, verb_name='build', build_base='build', install_base='install', merge_install=False, symlink_install=False, test_result_base=None, continue_on_error=False, executor='parallel', parallel_workers=6, event_handlers=None, ignore_user_meta=False, metas=['./colcon.meta'], base_paths=['.'], packages_ignore=None, packages_ignore_regex=None, paths=None, packages_up_to=None, packages_up_to_regex=None, packages_above=None, packages_above_and_dependencies=None, packages_above_depth=None, packages_select_by_dep=None, packages_skip_by_dep=None, packages_skip_up_to=None, packages_select_build_failed=False, packages_skip_build_finished=False, packages_select_test_failures=False, packages_skip_test_passed=False, packages_select=None, packages_skip=None, packages_select_regex=None, packages_skip_regex=None, packages_start=None, packages_end=None, allow_overriding=[], cmake_args=None, cmake_target=None, cmake_target_skip_unavailable=False, cmake_clean_cache=False, cmake_clean_first=False, cmake_force_configure=False, ament_cmake_args=None, catkin_cmake_args=None, catkin_skip_building_tests=False, verb_parser=<colcon_defaults.argument_parser.defaults.DefaultArgumentsDecorator object at 0xffff85a09f00>, verb_extension=<colcon_core.verb.build.BuildVerb object at 0xffff85a8fe50>, main=<bound method BuildVerb.main of <colcon_core.verb.build.BuildVerb object at 0xffff85a8fe50>>)
+[1.541s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) check parameters
+[1.541s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) check parameters
+[1.541s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) check parameters
+[1.541s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) check parameters
+[1.542s] Level 1:colcon.colcon_core.package_discovery:discover_packages(colcon_meta) discover
+[1.542s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) discover
+[1.542s] INFO:colcon.colcon_core.package_discovery:Crawling recursively for packages in '/home/seano/Seano_ws'
+[1.542s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ignore', 'ignore_ament_install']
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore'
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ignore_ament_install'
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_pkg']
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_pkg'
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['colcon_meta']
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'colcon_meta'
+[1.543s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['ros']
+[1.544s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'ros'
+[1.615s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['cmake', 'python']
+[1.615s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'cmake'
+[1.615s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python'
+[1.615s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extensions ['python_setup_py']
+[1.615s] Level 1:colcon.colcon_core.package_identification:_identify(.) by extension 'python_setup_py'
+[1.616s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extensions ['ignore', 'ignore_ament_install']
+[1.616s] Level 1:colcon.colcon_core.package_identification:_identify(build) by extension 'ignore'
+[1.616s] Level 1:colcon.colcon_core.package_identification:_identify(build) ignored
+[1.617s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extensions ['ignore', 'ignore_ament_install']
+[1.617s] Level 1:colcon.colcon_core.package_identification:_identify(install) by extension 'ignore'
+[1.617s] Level 1:colcon.colcon_core.package_identification:_identify(install) ignored
+[1.617s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extensions ['ignore', 'ignore_ament_install']
+[1.617s] Level 1:colcon.colcon_core.package_identification:_identify(log) by extension 'ignore'
+[1.617s] Level 1:colcon.colcon_core.package_identification:_identify(log) ignored
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ignore', 'ignore_ament_install']
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore'
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ignore_ament_install'
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_pkg']
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_pkg'
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['colcon_meta']
+[1.624s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'colcon_meta'
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['ros']
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'ros'
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['cmake', 'python']
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'cmake'
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python'
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extensions ['python_setup_py']
+[1.625s] Level 1:colcon.colcon_core.package_identification:_identify(src) by extension 'python_setup_py'
+[1.626s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extensions ['ignore', 'ignore_ament_install']
+[1.626s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extension 'ignore'
+[1.626s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extension 'ignore_ament_install'
+[1.626s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extensions ['colcon_pkg']
+[1.626s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extension 'colcon_pkg'
+[1.627s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extensions ['colcon_meta']
+[1.627s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extension 'colcon_meta'
+[1.627s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extensions ['ros']
+[1.627s] Level 1:colcon.colcon_core.package_identification:_identify(src/seano_startup) by extension 'ros'
+[1.654s] DEBUG:colcon.colcon_core.package_identification:Package 'src/seano_startup' with type 'ros.ament_python' and name 'seano_startup'
+[1.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(recursive) using defaults
+[1.654s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) discover
+[1.655s] Level 1:colcon.colcon_core.package_discovery:discover_packages(ignore) using defaults
+[1.655s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) discover
+[1.655s] Level 1:colcon.colcon_core.package_discovery:discover_packages(path) using defaults
+[1.990s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) check parameters
+[1.990s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) discover
+[1.999s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 1 installed packages in /home/seano/Seano_ws/install
+[2.001s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 7 installed packages in /home/seano/seano_ws/install
+[2.004s] DEBUG:colcon.colcon_installed_package_information.package_discovery:Found 279 installed packages in /opt/ros/humble
+[2.008s] Level 1:colcon.colcon_core.package_discovery:discover_packages(prefix_path) using defaults
+[2.138s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'cmake_args' from command line to 'None'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'cmake_target' from command line to 'None'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'cmake_target_skip_unavailable' from command line to 'False'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'cmake_clean_cache' from command line to 'False'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'cmake_clean_first' from command line to 'False'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'cmake_force_configure' from command line to 'False'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'ament_cmake_args' from command line to 'None'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'catkin_cmake_args' from command line to 'None'
+[2.139s] Level 5:colcon.colcon_core.verb:set package 'seano_startup' build argument 'catkin_skip_building_tests' from command line to 'False'
+[2.139s] DEBUG:colcon.colcon_core.verb:Building package 'seano_startup' with the following arguments: {'ament_cmake_args': None, 'build_base': '/home/seano/Seano_ws/build/seano_startup', 'catkin_cmake_args': None, 'catkin_skip_building_tests': False, 'cmake_args': None, 'cmake_clean_cache': False, 'cmake_clean_first': False, 'cmake_force_configure': False, 'cmake_target': None, 'cmake_target_skip_unavailable': False, 'install_base': '/home/seano/Seano_ws/install/seano_startup', 'merge_install': False, 'path': '/home/seano/Seano_ws/src/seano_startup', 'symlink_install': False, 'test_result_base': None}
+[2.140s] INFO:colcon.colcon_core.executor:Executing jobs using 'parallel' executor
+[2.143s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete
+[2.144s] INFO:colcon.colcon_ros.task.ament_python.build:Building ROS package in '/home/seano/Seano_ws/src/seano_startup' with build type 'ament_python'
+[2.144s] Level 1:colcon.colcon_core.shell:create_environment_hook('seano_startup', 'ament_prefix_path')
+[2.165s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_core.shell.bat': Not used on non-Windows systems
+[2.166s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/hook/ament_prefix_path.ps1'
+[2.169s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/hook/ament_prefix_path.dsv'
+[2.172s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/hook/ament_prefix_path.sh'
+[2.175s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[2.175s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[3.051s] INFO:colcon.colcon_core.task.python.build:Building Python package in '/home/seano/Seano_ws/src/seano_startup'
+[3.053s] INFO:colcon.colcon_core.shell:Skip shell extension 'powershell' for command environment: Not usable outside of PowerShell
+[3.053s] DEBUG:colcon.colcon_core.shell:Skip shell extension 'dsv' for command environment
+[4.415s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoking command in '/home/seano/Seano_ws/src/seano_startup': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_startup build --build-base /home/seano/Seano_ws/build/seano_startup/build install --record /home/seano/Seano_ws/build/seano_startup/install.log --single-version-externally-managed install_data
+[5.477s] DEBUG:colcon.colcon_core.event_handler.log_command:Invoked command in '/home/seano/Seano_ws/src/seano_startup' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_startup build --build-base /home/seano/Seano_ws/build/seano_startup/build install --record /home/seano/Seano_ws/build/seano_startup/install.log --single-version-externally-managed install_data
+[5.505s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup' for CMake module files
+[5.506s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup' for CMake config files
+[5.508s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup/lib'
+[5.508s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup/bin'
+[5.509s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup/lib/pkgconfig/seano_startup.pc'
+[5.509s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages'
+[5.509s] Level 1:colcon.colcon_core.shell:create_environment_hook('seano_startup', 'pythonpath')
+[5.510s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/hook/pythonpath.ps1'
+[5.513s] INFO:colcon.colcon_core.shell:Creating environment descriptor '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/hook/pythonpath.dsv'
+[5.514s] INFO:colcon.colcon_core.shell:Creating environment hook '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/hook/pythonpath.sh'
+[5.516s] Level 1:colcon.colcon_core.environment:checking '/home/seano/Seano_ws/install/seano_startup/bin'
+[5.517s] Level 1:colcon.colcon_core.environment:create_environment_scripts_only(seano_startup)
+[5.517s] INFO:colcon.colcon_core.shell:Creating package script '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/package.ps1'
+[5.525s] INFO:colcon.colcon_core.shell:Creating package descriptor '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/package.dsv'
+[5.529s] INFO:colcon.colcon_core.shell:Creating package script '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/package.sh'
+[5.532s] INFO:colcon.colcon_core.shell:Creating package script '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/package.bash'
+[5.536s] INFO:colcon.colcon_core.shell:Creating package script '/home/seano/Seano_ws/install/seano_startup/share/seano_startup/package.zsh'
+[5.540s] Level 1:colcon.colcon_core.environment:create_file_with_runtime_dependencies(/home/seano/Seano_ws/install/seano_startup/share/colcon-core/packages/seano_startup)
+[5.541s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:closing loop
+[5.542s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:loop closed
+[5.543s] DEBUG:colcon.colcon_parallel_executor.executor.parallel:run_until_complete finished with '0'
+[5.543s] DEBUG:colcon.colcon_core.event_reactor:joining thread
+[5.568s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.terminal_notifier': Not used on non-Darwin systems
+[5.569s] INFO:colcon.colcon_core.plugin_system:Skipping extension 'colcon_notification.desktop_notification.win32': Not used on non-Windows systems
+[5.569s] INFO:colcon.colcon_notification.desktop_notification:Sending desktop notification using 'notify2'
+[5.652s] DEBUG:colcon.colcon_core.event_reactor:joined thread
+[5.654s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/seano/Seano_ws/install/local_setup.ps1'
+[5.658s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/seano/Seano_ws/install/_local_setup_util_ps1.py'
+[5.664s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/seano/Seano_ws/install/setup.ps1'
+[5.670s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/seano/Seano_ws/install/local_setup.sh'
+[5.673s] INFO:colcon.colcon_core.shell:Creating prefix util module '/home/seano/Seano_ws/install/_local_setup_util_sh.py'
+[5.675s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/seano/Seano_ws/install/setup.sh'
+[5.680s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/seano/Seano_ws/install/local_setup.bash'
+[5.683s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/seano/Seano_ws/install/setup.bash'
+[5.688s] INFO:colcon.colcon_core.shell:Creating prefix script '/home/seano/Seano_ws/install/local_setup.zsh'
+[5.690s] INFO:colcon.colcon_core.shell:Creating prefix chain script '/home/seano/Seano_ws/install/setup.zsh'

@@ -1,0 +1,33 @@
+[2.554s] Invoking command in '/home/seano/Seano_ws/src/seano_failsafe': PYTHONPATH=/home/seano/Seano_ws/build/seano_failsafe/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_failsafe build --build-base /home/seano/Seano_ws/build/seano_failsafe/build install --record /home/seano/Seano_ws/build/seano_failsafe/install.log --single-version-externally-managed install_data
+[3.230s] running egg_info
+[3.232s] writing ../../build/seano_failsafe/seano_failsafe.egg-info/PKG-INFO
+[3.233s] writing dependency_links to ../../build/seano_failsafe/seano_failsafe.egg-info/dependency_links.txt
+[3.233s] writing entry points to ../../build/seano_failsafe/seano_failsafe.egg-info/entry_points.txt
+[3.234s] writing requirements to ../../build/seano_failsafe/seano_failsafe.egg-info/requires.txt
+[3.234s] writing top-level names to ../../build/seano_failsafe/seano_failsafe.egg-info/top_level.txt
+[3.239s] reading manifest file '../../build/seano_failsafe/seano_failsafe.egg-info/SOURCES.txt'
+[3.241s] writing manifest file '../../build/seano_failsafe/seano_failsafe.egg-info/SOURCES.txt'
+[3.242s] running build
+[3.242s] running build_py
+[3.242s] copying seano_failsafe/seano_communication_monitor.py -> /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe
+[3.243s] copying seano_failsafe/seano_failsafe.py -> /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe
+[3.243s] copying seano_failsafe/seano_battery.py -> /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe
+[3.244s] running install
+[3.244s] running install_lib
+[3.246s] copying /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe/seano_communication_monitor.py -> /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe
+[3.247s] copying /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe/seano_failsafe.py -> /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe
+[3.248s] copying /home/seano/Seano_ws/build/seano_failsafe/build/lib/seano_failsafe/seano_battery.py -> /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe
+[3.249s] byte-compiling /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe/seano_communication_monitor.py to seano_communication_monitor.cpython-310.pyc
+[3.253s] byte-compiling /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe/seano_failsafe.py to seano_failsafe.cpython-310.pyc
+[3.257s] byte-compiling /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe/seano_battery.py to seano_battery.cpython-310.pyc
+[3.263s] running install_data
+[3.263s] copying package.xml -> /home/seano/Seano_ws/install/seano_failsafe/share/seano_failsafe
+[3.263s] running install_egg_info
+[3.271s] removing '/home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe-0.0.0-py3.10.egg-info' (and everything under it)
+[3.272s] Copying ../../build/seano_failsafe/seano_failsafe.egg-info to /home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages/seano_failsafe-0.0.0-py3.10.egg-info
+[3.275s] running install_scripts
+[3.332s] Installing seano_battery script to /home/seano/Seano_ws/install/seano_failsafe/lib/seano_failsafe
+[3.333s] Installing seano_communication_monitor script to /home/seano/Seano_ws/install/seano_failsafe/lib/seano_failsafe
+[3.334s] Installing seano_failsafe script to /home/seano/Seano_ws/install/seano_failsafe/lib/seano_failsafe
+[3.335s] writing list of installed files to '/home/seano/Seano_ws/build/seano_failsafe/install.log'
+[3.491s] Invoked command in '/home/seano/Seano_ws/src/seano_failsafe' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_failsafe/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_failsafe/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_failsafe build --build-base /home/seano/Seano_ws/build/seano_failsafe/build install --record /home/seano/Seano_ws/build/seano_failsafe/install.log --single-version-externally-managed install_data

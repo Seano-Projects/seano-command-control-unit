@@ -1,0 +1,21 @@
+[2.996s] Invoking command in '/home/seano/Seano_ws/src/seano_startup': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_startup build --build-base /home/seano/Seano_ws/build/seano_startup/build install --record /home/seano/Seano_ws/build/seano_startup/install.log --single-version-externally-managed install_data
+[3.789s] running egg_info
+[3.791s] writing ../../build/seano_startup/seano_startup.egg-info/PKG-INFO
+[3.792s] writing dependency_links to ../../build/seano_startup/seano_startup.egg-info/dependency_links.txt
+[3.792s] writing entry points to ../../build/seano_startup/seano_startup.egg-info/entry_points.txt
+[3.793s] writing requirements to ../../build/seano_startup/seano_startup.egg-info/requires.txt
+[3.793s] writing top-level names to ../../build/seano_startup/seano_startup.egg-info/top_level.txt
+[3.797s] reading manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+[3.799s] writing manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+[3.800s] running build
+[3.800s] running build_py
+[3.800s] running install
+[3.801s] running install_lib
+[3.806s] running install_data
+[3.807s] copying config/system.yaml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/config
+[3.807s] running install_egg_info
+[3.853s] removing '/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup-0.0.0-py3.10.egg-info' (and everything under it)
+[3.854s] Copying ../../build/seano_startup/seano_startup.egg-info to /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup-0.0.0-py3.10.egg-info
+[3.856s] running install_scripts
+[3.960s] writing list of installed files to '/home/seano/Seano_ws/build/seano_startup/install.log'
+[4.138s] Invoked command in '/home/seano/Seano_ws/src/seano_startup' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_startup build --build-base /home/seano/Seano_ws/build/seano_startup/build install --record /home/seano/Seano_ws/build/seano_startup/install.log --single-version-externally-managed install_data

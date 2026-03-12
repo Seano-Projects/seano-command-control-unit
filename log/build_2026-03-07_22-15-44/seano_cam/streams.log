@@ -1,0 +1,22 @@
+[1.833s] Invoking command in '/home/seano/Seano_ws/src/seano_cam': PYTHONPATH=/home/seano/Seano_ws/build/seano_cam/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_cam build --build-base /home/seano/Seano_ws/build/seano_cam/build install --record /home/seano/Seano_ws/build/seano_cam/install.log --single-version-externally-managed install_data
+[2.515s] running egg_info
+[2.516s] writing ../../build/seano_cam/seano_cam.egg-info/PKG-INFO
+[2.516s] writing dependency_links to ../../build/seano_cam/seano_cam.egg-info/dependency_links.txt
+[2.517s] writing entry points to ../../build/seano_cam/seano_cam.egg-info/entry_points.txt
+[2.517s] writing requirements to ../../build/seano_cam/seano_cam.egg-info/requires.txt
+[2.518s] writing top-level names to ../../build/seano_cam/seano_cam.egg-info/top_level.txt
+[2.523s] reading manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'
+[2.525s] writing manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'
+[2.526s] running build
+[2.526s] running build_py
+[2.526s] running install
+[2.527s] running install_lib
+[2.532s] running install_data
+[2.532s] running install_egg_info
+[2.541s] removing '/home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam-0.0.0-py3.10.egg-info' (and everything under it)
+[2.541s] Copying ../../build/seano_cam/seano_cam.egg-info to /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam-0.0.0-py3.10.egg-info
+[2.544s] running install_scripts
+[2.603s] Installing camera_node script to /home/seano/Seano_ws/install/seano_cam/lib/seano_cam
+[2.604s] Installing camera_viewer script to /home/seano/Seano_ws/install/seano_cam/lib/seano_cam
+[2.604s] writing list of installed files to '/home/seano/Seano_ws/build/seano_cam/install.log'
+[2.720s] Invoked command in '/home/seano/Seano_ws/src/seano_cam' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_cam/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_cam build --build-base /home/seano/Seano_ws/build/seano_cam/build install --record /home/seano/Seano_ws/build/seano_cam/install.log --single-version-externally-managed install_data

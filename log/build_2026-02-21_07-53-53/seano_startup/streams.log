@@ -1,0 +1,20 @@
+[5.084s] Invoking command in '/home/seano/Seano_ws/build/seano_startup': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/seano/Seano_ws/build/seano_startup/build --no-deps symlink_data --force
+[5.842s] running develop
+[6.257s] running egg_info
+[6.258s] writing seano_startup.egg-info/PKG-INFO
+[6.259s] writing dependency_links to seano_startup.egg-info/dependency_links.txt
+[6.260s] writing entry points to seano_startup.egg-info/entry_points.txt
+[6.260s] writing requirements to seano_startup.egg-info/requires.txt
+[6.261s] writing top-level names to seano_startup.egg-info/top_level.txt
+[6.275s] reading manifest file 'seano_startup.egg-info/SOURCES.txt'
+[6.276s] writing manifest file 'seano_startup.egg-info/SOURCES.txt'
+[6.281s] running build_ext
+[6.282s] Creating /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano-startup.egg-link (link to .)
+[6.285s] 
+[6.285s] Installed /home/seano/Seano_ws/build/seano_startup
+[6.285s] running symlink_data
+[6.285s] symbolically linking /home/seano/Seano_ws/build/seano_startup/resource/seano_startup -> /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index/packages
+[6.286s] symbolically linking /home/seano/Seano_ws/build/seano_startup/package.xml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup
+[6.286s] symbolically linking /home/seano/Seano_ws/build/seano_startup/launch/system.launch.py -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/launch
+[6.286s] symbolically linking /home/seano/Seano_ws/build/seano_startup/config/system.yaml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/config
+[6.485s] Invoked command in '/home/seano/Seano_ws/build/seano_startup' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/seano/Seano_ws/build/seano_startup/build --no-deps symlink_data --force

@@ -1,0 +1,19 @@
+running egg_info
+writing ../../build/seano_logging/seano_logging.egg-info/PKG-INFO
+writing dependency_links to ../../build/seano_logging/seano_logging.egg-info/dependency_links.txt
+writing entry points to ../../build/seano_logging/seano_logging.egg-info/entry_points.txt
+writing requirements to ../../build/seano_logging/seano_logging.egg-info/requires.txt
+writing top-level names to ../../build/seano_logging/seano_logging.egg-info/top_level.txt
+reading manifest file '../../build/seano_logging/seano_logging.egg-info/SOURCES.txt'
+writing manifest file '../../build/seano_logging/seano_logging.egg-info/SOURCES.txt'
+running build
+running build_py
+running install
+running install_lib
+running install_data
+running install_egg_info
+removing '/home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/seano_logging/seano_logging.egg-info to /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging-0.0.0-py3.10.egg-info
+running install_scripts
+Installing telemetry_logger_node script to /home/seano/Seano_ws/install/seano_logging/lib/seano_logging
+writing list of installed files to '/home/seano/Seano_ws/build/seano_logging/install.log'

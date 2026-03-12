@@ -1,0 +1,16 @@
+mqtt_status:
+  ros__parameters:
+    # Vehicle identification
+    vehicle_code: "USV-001"
+    
+    # MQTT Broker Configuration
+    mqtt:
+      broker: "mqtt.seano.cloud"
+      port: 8883
+      username: "seanomqtt"
+      password: "Seano2025*"
+      keepalive: 60
+      base_topic: "seano"
+    
+    # Heartbeat interval in seconds
+    heartbeat_interval: 30.0

@@ -1,0 +1,16 @@
+package.xml
+setup.cfg
+setup.py
+../../build/seano_communication/seano_communication.egg-info/PKG-INFO
+../../build/seano_communication/seano_communication.egg-info/SOURCES.txt
+../../build/seano_communication/seano_communication.egg-info/dependency_links.txt
+../../build/seano_communication/seano_communication.egg-info/entry_points.txt
+../../build/seano_communication/seano_communication.egg-info/requires.txt
+../../build/seano_communication/seano_communication.egg-info/top_level.txt
+../../build/seano_communication/seano_communication.egg-info/zip-safe
+resource/seano_communication
+seano_communication/__init__.py
+seano_communication/communication_node.py
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

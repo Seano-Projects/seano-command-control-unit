@@ -1,0 +1,24 @@
+[1.660s] Invoking command in '/home/seano/Seano_ws/src/seano_communication': PYTHONPATH=/home/seano/Seano_ws/build/seano_communication/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_communication build --build-base /home/seano/Seano_ws/build/seano_communication/build install --record /home/seano/Seano_ws/build/seano_communication/install.log --single-version-externally-managed install_data
+[2.283s] running egg_info
+[2.285s] writing ../../build/seano_communication/seano_communication.egg-info/PKG-INFO
+[2.285s] writing dependency_links to ../../build/seano_communication/seano_communication.egg-info/dependency_links.txt
+[2.286s] writing entry points to ../../build/seano_communication/seano_communication.egg-info/entry_points.txt
+[2.286s] writing requirements to ../../build/seano_communication/seano_communication.egg-info/requires.txt
+[2.287s] writing top-level names to ../../build/seano_communication/seano_communication.egg-info/top_level.txt
+[2.291s] reading manifest file '../../build/seano_communication/seano_communication.egg-info/SOURCES.txt'
+[2.293s] writing manifest file '../../build/seano_communication/seano_communication.egg-info/SOURCES.txt'
+[2.293s] running build
+[2.293s] running build_py
+[2.294s] copying seano_communication/communication_node.py -> /home/seano/Seano_ws/build/seano_communication/build/lib/seano_communication
+[2.295s] running install
+[2.296s] running install_lib
+[2.298s] copying /home/seano/Seano_ws/build/seano_communication/build/lib/seano_communication/communication_node.py -> /home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages/seano_communication
+[2.300s] byte-compiling /home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages/seano_communication/communication_node.py to communication_node.cpython-310.pyc
+[2.304s] running install_data
+[2.304s] running install_egg_info
+[2.309s] removing '/home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages/seano_communication-0.0.0-py3.10.egg-info' (and everything under it)
+[2.310s] Copying ../../build/seano_communication/seano_communication.egg-info to /home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages/seano_communication-0.0.0-py3.10.egg-info
+[2.313s] running install_scripts
+[2.370s] Installing communication_node script to /home/seano/Seano_ws/install/seano_communication/lib/seano_communication
+[2.371s] writing list of installed files to '/home/seano/Seano_ws/build/seano_communication/install.log'
+[2.478s] Invoked command in '/home/seano/Seano_ws/src/seano_communication' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_communication/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_communication build --build-base /home/seano/Seano_ws/build/seano_communication/build install --record /home/seano/Seano_ws/build/seano_communication/install.log --single-version-externally-managed install_data

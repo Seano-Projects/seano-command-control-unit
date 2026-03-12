@@ -1,0 +1,37 @@
+[4.048s] Invoking command in '/home/seano/Seano_ws/src/seano_logging': PYTHONPATH=/home/seano/Seano_ws/build/seano_logging/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_logging build --build-base /home/seano/Seano_ws/build/seano_logging/build install --record /home/seano/Seano_ws/build/seano_logging/install.log --single-version-externally-managed install_data
+[4.709s] running egg_info
+[4.710s] creating ../../build/seano_logging/seano_logging.egg-info
+[4.711s] writing ../../build/seano_logging/seano_logging.egg-info/PKG-INFO
+[4.712s] writing dependency_links to ../../build/seano_logging/seano_logging.egg-info/dependency_links.txt
+[4.712s] writing entry points to ../../build/seano_logging/seano_logging.egg-info/entry_points.txt
+[4.713s] writing requirements to ../../build/seano_logging/seano_logging.egg-info/requires.txt
+[4.713s] writing top-level names to ../../build/seano_logging/seano_logging.egg-info/top_level.txt
+[4.714s] writing manifest file '../../build/seano_logging/seano_logging.egg-info/SOURCES.txt'
+[4.718s] reading manifest file '../../build/seano_logging/seano_logging.egg-info/SOURCES.txt'
+[4.720s] writing manifest file '../../build/seano_logging/seano_logging.egg-info/SOURCES.txt'
+[4.721s] running build
+[4.721s] running build_py
+[4.722s] creating /home/seano/Seano_ws/build/seano_logging/build
+[4.722s] creating /home/seano/Seano_ws/build/seano_logging/build/lib
+[4.722s] creating /home/seano/Seano_ws/build/seano_logging/build/lib/seano_logging
+[4.723s] copying seano_logging/telemetry_logger_node.py -> /home/seano/Seano_ws/build/seano_logging/build/lib/seano_logging
+[4.723s] copying seano_logging/__init__.py -> /home/seano/Seano_ws/build/seano_logging/build/lib/seano_logging
+[4.723s] running install
+[4.724s] running install_lib
+[4.726s] creating /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging
+[4.727s] copying /home/seano/Seano_ws/build/seano_logging/build/lib/seano_logging/telemetry_logger_node.py -> /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging
+[4.727s] copying /home/seano/Seano_ws/build/seano_logging/build/lib/seano_logging/__init__.py -> /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging
+[4.729s] byte-compiling /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging/telemetry_logger_node.py to telemetry_logger_node.cpython-310.pyc
+[4.731s] byte-compiling /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging/__init__.py to __init__.cpython-310.pyc
+[4.732s] running install_data
+[4.732s] creating /home/seano/Seano_ws/install/seano_logging/share/ament_index
+[4.733s] creating /home/seano/Seano_ws/install/seano_logging/share/ament_index/resource_index
+[4.733s] creating /home/seano/Seano_ws/install/seano_logging/share/ament_index/resource_index/packages
+[4.733s] copying resource/seano_logging -> /home/seano/Seano_ws/install/seano_logging/share/ament_index/resource_index/packages
+[4.733s] copying package.xml -> /home/seano/Seano_ws/install/seano_logging/share/seano_logging
+[4.733s] running install_egg_info
+[4.739s] Copying ../../build/seano_logging/seano_logging.egg-info to /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano_logging-0.0.0-py3.10.egg-info
+[4.742s] running install_scripts
+[4.811s] Installing telemetry_logger_node script to /home/seano/Seano_ws/install/seano_logging/lib/seano_logging
+[4.813s] writing list of installed files to '/home/seano/Seano_ws/build/seano_logging/install.log'
+[5.026s] Invoked command in '/home/seano/Seano_ws/src/seano_logging' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_logging/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_logging build --build-base /home/seano/Seano_ws/build/seano_logging/build install --record /home/seano/Seano_ws/build/seano_logging/install.log --single-version-externally-managed install_data

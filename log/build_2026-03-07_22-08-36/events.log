@@ -1,0 +1,74 @@
+[0.000000] (-) TimerEvent: {}
+[0.001309] (-) JobUnselected: {'identifier': 'seano_command'}
+[0.001588] (-) JobUnselected: {'identifier': 'seano_communication'}
+[0.001942] (-) JobUnselected: {'identifier': 'seano_logging'}
+[0.002023] (-) JobUnselected: {'identifier': 'seano_mqtt_bridge'}
+[0.002070] (-) JobUnselected: {'identifier': 'seano_startup'}
+[0.002114] (-) JobUnselected: {'identifier': 'seano_telemetry'}
+[0.002163] (seano_cam) JobQueued: {'identifier': 'seano_cam', 'dependencies': OrderedDict()}
+[0.002921] (seano_cam) JobStarted: {'identifier': 'seano_cam'}
+[0.099846] (-) TimerEvent: {}
+[0.200779] (-) TimerEvent: {}
+[0.301747] (-) TimerEvent: {}
+[0.402729] (-) TimerEvent: {}
+[0.503671] (-) TimerEvent: {}
+[0.604643] (-) TimerEvent: {}
+[0.705637] (-) TimerEvent: {}
+[0.806851] (-) TimerEvent: {}
+[0.907820] (-) TimerEvent: {}
+[1.008762] (-) TimerEvent: {}
+[1.109698] (-) TimerEvent: {}
+[1.210683] (-) TimerEvent: {}
+[1.311613] (-) TimerEvent: {}
+[1.412562] (-) TimerEvent: {}
+[1.513496] (-) TimerEvent: {}
+[1.614407] (-) TimerEvent: {}
+[1.715393] (-) TimerEvent: {}
+[1.751278] (seano_cam) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/seano_cam', 'build', '--build-base', '/home/seano/Seano_ws/build/seano_cam/build', 'install', '--record', '/home/seano/Seano_ws/build/seano_cam/install.log', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/seano/Seano_ws/src/seano_cam', 'env': {'PYTHON_BASIC_REPL': '1', 'LESSOPEN': '| /usr/bin/lesspipe %s', 'USER': 'seano', 'SSH_CLIENT': '100.117.159.114 48627 22', 'GIT_EDITOR': ':', 'GIT_ASKPASS': '/home/seano/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/extensions/git/dist/askpass.sh', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/aarch64-linux-gnu:/opt/ros/humble/lib', 'BROWSER': '/home/seano/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/helpers/browser.sh', 'HOME': '/home/seano', 'OLDPWD': '/home/seano/Seano_ws', 'TERM_PROGRAM_VERSION': '1.110.1', 'VSCODE_IPC_HOOK_CLI': '/tmp/vscode-ipc-0ccd0171-4adf-4ac5-9add-edcbcbfaddee.sock', 'ROS_PYTHON_VERSION': '3', 'VSCODE_GIT_ASKPASS_MAIN': '/home/seano/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/extensions/git/dist/askpass-main.js', 'VSCODE_GIT_ASKPASS_NODE': '/home/seano/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/node', 'PYDEVD_DISABLE_FILE_VALIDATION': '1', 'BUNDLED_DEBUGPY_PATH': '/home/seano/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-arm64/bundled/libs/debugpy', 'VSCODE_PYTHON_AUTOACTIVATE_GUARD': '1', 'DBUS_SESSION_BUS_ADDRESS': 'unix:path=/run/user/1000/bus', 'COLORTERM': 'truecolor', 'COLCON_PREFIX_PATH': '/home/seano/Seano_ws/install:/home/seano/seano_ws/install', 'ROS_DISTRO': 'humble', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'TERM': 'xterm-256color', 'ROS_LOCALHOST_ONLY': '0', 'HISTCONTROL': 'ignorespace', 'PATH': '/home/seano/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand:/home/seano/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli:/home/seano/.vscode-server/cli/servers/Stable-61b3d0ab13be7dda2389f1d3e60a119c7f660cc3/server/bin/remote-cli:/home/seano/.local/bin:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/seano/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-arm64/bundled/scripts/noConfigScripts', 'VSCODE_DEBUGPY_ADAPTER_ENDPOINTS': '/home/seano/.vscode-server/extensions/ms-python.debugpy-2025.18.0-linux-arm64/.noConfigDebugAdapterEndpoints/endpoint-4fb55d90d5d3f063.txt', 'LANG': 'en_US.UTF-8', 'PYTHONSTARTUP': '/home/seano/.vscode-server/data/User/workspaceStorage/faccc0d1bc779bb5d26deac1dfb5320e/ms-python.python/pythonrc.py', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'VSCODE_GIT_IPC_HANDLE': '/tmp/vscode-git-d3d97cf1a7.sock', 'TERM_PROGRAM': 'vscode', 'ROS_DOMAIN_ID': '0', 'AMENT_PREFIX_PATH': '/home/seano/seano_ws/install/usv_dashboard:/home/seano/seano_ws/install/usv_control:/home/seano/seano_ws/install/seano_vision:/home/seano/seano_ws/install/seano_bringup:/home/seano/seano_ws/install/seano_bridge:/home/seano/seano_ws/install/fail_safe:/home/seano/seano_ws/install/data_acquisition:/home/seano/seano_ws/install/communication:/home/seano/seano_ws/install/autonomous_nav:/home/seano/seano_ws/install/anti_theft:/home/seano/Seano_ws/install/seano_telemetry:/home/seano/Seano_ws/install/seano_startup:/home/seano/Seano_ws/install/seano_mqtt_bridge:/home/seano/Seano_ws/install/seano_logging:/home/seano/Seano_ws/install/seano_communication:/home/seano/Seano_ws/install/seano_command:/opt/ros/humble', 'SHELL': '/bin/bash', 'LESSCLOSE': '/usr/bin/lesspipe %s %s', 'VSCODE_GIT_ASKPASS_EXTRA_ARGS': '', 'GIT_PAGER': 'cat', 'PWD': '/home/seano/Seano_ws/build/seano_cam', 'GIT_MERGE_AUTOEDIT': 'no', 'SSH_CONNECTION': '100.117.159.114 48627 100.81.76.78 22', 'XDG_DATA_DIRS': '/usr/share/gnome:/home/seano/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share:/var/lib/snapd/desktop', 'PYTHONPATH': '/home/seano/Seano_ws/build/seano_cam/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages:/home/seano/seano_ws/build/usv_dashboard:/home/seano/seano_ws/install/usv_dashboard/lib/python3.10/site-packages:/home/seano/seano_ws/install/usv_control/lib/python3.10/site-packages:/home/seano/seano_ws/build/seano_vision:/home/seano/seano_ws/install/seano_vision/lib/python3.10/site-packages:/home/seano/seano_ws/build/seano_bringup:/home/seano/seano_ws/install/seano_bringup/lib/python3.10/site-packages:/home/seano/seano_ws/install/seano_bridge/lib/python3.10/site-packages:/home/seano/seano_ws/build/fail_safe:/home/seano/seano_ws/install/fail_safe/lib/python3.10/site-packages:/home/seano/seano_ws/build/data_acquisition:/home/seano/seano_ws/install/data_acquisition/lib/python3.10/site-packages:/home/seano/seano_ws/build/communication:/home/seano/seano_ws/install/communication/lib/python3.10/site-packages:/home/seano/seano_ws/build/autonomous_nav:/home/seano/seano_ws/install/autonomous_nav/lib/python3.10/site-packages:/home/seano/seano_ws/build/anti_theft:/home/seano/seano_ws/install/anti_theft/lib/python3.10/site-packages:/home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:/home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages:/home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages:/home/seano/Seano_ws/install/seano_communication/lib/python3.10/site-packages:/home/seano/Seano_ws/install/seano_command/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[1.815613] (-) TimerEvent: {}
+[1.917041] (-) TimerEvent: {}
+[2.018198] (-) TimerEvent: {}
+[2.119343] (-) TimerEvent: {}
+[2.220471] (-) TimerEvent: {}
+[2.321554] (-) TimerEvent: {}
+[2.414436] (seano_cam) StdoutLine: {'line': b'running egg_info\n'}
+[2.415836] (seano_cam) StdoutLine: {'line': b'creating ../../build/seano_cam/seano_cam.egg-info\n'}
+[2.416430] (seano_cam) StdoutLine: {'line': b'writing ../../build/seano_cam/seano_cam.egg-info/PKG-INFO\n'}
+[2.417101] (seano_cam) StdoutLine: {'line': b'writing dependency_links to ../../build/seano_cam/seano_cam.egg-info/dependency_links.txt\n'}
+[2.417495] (seano_cam) StdoutLine: {'line': b'writing entry points to ../../build/seano_cam/seano_cam.egg-info/entry_points.txt\n'}
+[2.417850] (seano_cam) StdoutLine: {'line': b'writing requirements to ../../build/seano_cam/seano_cam.egg-info/requires.txt\n'}
+[2.418262] (seano_cam) StdoutLine: {'line': b'writing top-level names to ../../build/seano_cam/seano_cam.egg-info/top_level.txt\n'}
+[2.418600] (seano_cam) StdoutLine: {'line': b"writing manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'\n"}
+[2.421632] (-) TimerEvent: {}
+[2.422916] (seano_cam) StdoutLine: {'line': b"reading manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'\n"}
+[2.424464] (seano_cam) StdoutLine: {'line': b"writing manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'\n"}
+[2.424983] (seano_cam) StdoutLine: {'line': b'running build\n'}
+[2.425285] (seano_cam) StdoutLine: {'line': b'running build_py\n'}
+[2.425716] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/build/seano_cam/build\n'}
+[2.426110] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/build/seano_cam/build/lib\n'}
+[2.426454] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam\n'}
+[2.426762] (seano_cam) StdoutLine: {'line': b'copying seano_cam/camera_node.py -> /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam\n'}
+[2.427028] (seano_cam) StdoutLine: {'line': b'copying seano_cam/__init__.py -> /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam\n'}
+[2.427274] (seano_cam) StdoutLine: {'line': b'running install\n'}
+[2.427561] (seano_cam) StdoutLine: {'line': b'running install_lib\n'}
+[2.429447] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam\n'}
+[2.430004] (seano_cam) StdoutLine: {'line': b'copying /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam/camera_node.py -> /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam\n'}
+[2.430854] (seano_cam) StdoutLine: {'line': b'copying /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam/__init__.py -> /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam\n'}
+[2.431898] (seano_cam) StdoutLine: {'line': b'byte-compiling /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam/camera_node.py to camera_node.cpython-310.pyc\n'}
+[2.435011] (seano_cam) StdoutLine: {'line': b'byte-compiling /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam/__init__.py to __init__.cpython-310.pyc\n'}
+[2.435529] (seano_cam) StdoutLine: {'line': b'running install_data\n'}
+[2.435937] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/install/seano_cam/share/ament_index\n'}
+[2.436310] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/install/seano_cam/share/ament_index/resource_index\n'}
+[2.436643] (seano_cam) StdoutLine: {'line': b'creating /home/seano/Seano_ws/install/seano_cam/share/ament_index/resource_index/packages\n'}
+[2.436896] (seano_cam) StdoutLine: {'line': b'copying resource/seano_cam -> /home/seano/Seano_ws/install/seano_cam/share/ament_index/resource_index/packages\n'}
+[2.437190] (seano_cam) StdoutLine: {'line': b'copying package.xml -> /home/seano/Seano_ws/install/seano_cam/share/seano_cam\n'}
+[2.437424] (seano_cam) StdoutLine: {'line': b'running install_egg_info\n'}
+[2.445806] (seano_cam) StdoutLine: {'line': b'Copying ../../build/seano_cam/seano_cam.egg-info to /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam-0.0.0-py3.10.egg-info\n'}
+[2.448430] (seano_cam) StdoutLine: {'line': b'running install_scripts\n'}
+[2.506176] (seano_cam) StdoutLine: {'line': b'Installing camera_node script to /home/seano/Seano_ws/install/seano_cam/lib/seano_cam\n'}
+[2.507309] (seano_cam) StdoutLine: {'line': b"writing list of installed files to '/home/seano/Seano_ws/build/seano_cam/install.log'\n"}
+[2.521877] (-) TimerEvent: {}
+[2.617526] (seano_cam) CommandEnded: {'returncode': 0}
+[2.622046] (-) TimerEvent: {}
+[2.674925] (seano_cam) JobEnded: {'identifier': 'seano_cam', 'rc': 0}
+[2.678647] (-) EventReactorShutdown: {}

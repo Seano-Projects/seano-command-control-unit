@@ -1,0 +1,32 @@
+running develop
+Removing /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano-mqtt-bridge.egg-link (link to .)
+running egg_info
+writing ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/PKG-INFO
+writing dependency_links to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/dependency_links.txt
+writing entry points to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/entry_points.txt
+writing requirements to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/requires.txt
+writing top-level names to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/top_level.txt
+reading manifest file '../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/SOURCES.txt'
+writing manifest file '../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/seano/Seano_ws/build/seano_mqtt_bridge/build
+creating /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib
+creating /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge
+copying seano_mqtt_bridge/mqtt_bridge_node.py -> /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge
+copying seano_mqtt_bridge/__init__.py -> /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge
+running install
+running install_lib
+creating /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge
+copying /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge/mqtt_bridge_node.py -> /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge
+copying /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge/__init__.py -> /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge
+byte-compiling /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge/mqtt_bridge_node.py to mqtt_bridge_node.cpython-310.pyc
+byte-compiling /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge/__init__.py to __init__.cpython-310.pyc
+running install_data
+copying resource/seano_mqtt_bridge -> /home/seano/Seano_ws/install/seano_mqtt_bridge/share/ament_index/resource_index/packages
+copying package.xml -> /home/seano/Seano_ws/install/seano_mqtt_bridge/share/seano_mqtt_bridge
+running install_egg_info
+Copying ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info to /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge-0.0.0-py3.10.egg-info
+running install_scripts
+Installing mqtt_bridge_node script to /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/seano_mqtt_bridge
+writing list of installed files to '/home/seano/Seano_ws/build/seano_mqtt_bridge/install.log'

@@ -1,0 +1,14 @@
+running develop
+running egg_info
+writing seano_startup.egg-info/PKG-INFO
+writing dependency_links to seano_startup.egg-info/dependency_links.txt
+writing entry points to seano_startup.egg-info/entry_points.txt
+writing requirements to seano_startup.egg-info/requires.txt
+writing top-level names to seano_startup.egg-info/top_level.txt
+reading manifest file 'seano_startup.egg-info/SOURCES.txt'
+writing manifest file 'seano_startup.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano-startup.egg-link (link to .)
+
+Installed /home/seano/Seano_ws/build/seano_startup
+running symlink_data

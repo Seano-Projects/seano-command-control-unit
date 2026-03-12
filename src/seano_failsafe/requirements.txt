@@ -1,0 +1,2 @@
+# Python dependencies for seano_failsafe package
+pyserial>=3.5

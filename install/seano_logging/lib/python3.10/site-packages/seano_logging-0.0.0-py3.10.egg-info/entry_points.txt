@@ -1,0 +1,3 @@
+[console_scripts]
+telemetry_logger_node = seano_logging.telemetry_logger_node:main
+

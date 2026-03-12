@@ -1,0 +1,17 @@
+[1.665s] Invoking command in '/home/seano/Seano_ws/build/seano_telemetry': PYTHONPATH=/home/seano/Seano_ws/build/seano_telemetry/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/seano/Seano_ws/build/seano_telemetry/build --no-deps symlink_data
+[2.349s] running develop
+[2.751s] running egg_info
+[2.751s] writing seano_telemetry.egg-info/PKG-INFO
+[2.752s] writing dependency_links to seano_telemetry.egg-info/dependency_links.txt
+[2.753s] writing entry points to seano_telemetry.egg-info/entry_points.txt
+[2.753s] writing requirements to seano_telemetry.egg-info/requires.txt
+[2.753s] writing top-level names to seano_telemetry.egg-info/top_level.txt
+[2.757s] reading manifest file 'seano_telemetry.egg-info/SOURCES.txt'
+[2.759s] writing manifest file 'seano_telemetry.egg-info/SOURCES.txt'
+[2.764s] running build_ext
+[2.765s] Creating /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano-telemetry.egg-link (link to .)
+[2.767s] Installing telemetry_node script to /home/seano/Seano_ws/install/seano_telemetry/lib/seano_telemetry
+[2.768s] 
+[2.768s] Installed /home/seano/Seano_ws/build/seano_telemetry
+[2.768s] running symlink_data
+[2.895s] Invoked command in '/home/seano/Seano_ws/build/seano_telemetry' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_telemetry/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/seano/Seano_ws/build/seano_telemetry/build --no-deps symlink_data

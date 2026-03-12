@@ -1,0 +1,37 @@
+[2.980s] Invoking command in '/home/seano/Seano_ws/src/seano_telemetry': PYTHONPATH=/home/seano/Seano_ws/build/seano_telemetry/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_telemetry build --build-base /home/seano/Seano_ws/build/seano_telemetry/build install --record /home/seano/Seano_ws/build/seano_telemetry/install.log --single-version-externally-managed install_data
+[3.758s] running egg_info
+[3.759s] creating ../../build/seano_telemetry/seano_telemetry.egg-info
+[3.759s] writing ../../build/seano_telemetry/seano_telemetry.egg-info/PKG-INFO
+[3.760s] writing dependency_links to ../../build/seano_telemetry/seano_telemetry.egg-info/dependency_links.txt
+[3.760s] writing entry points to ../../build/seano_telemetry/seano_telemetry.egg-info/entry_points.txt
+[3.761s] writing requirements to ../../build/seano_telemetry/seano_telemetry.egg-info/requires.txt
+[3.761s] writing top-level names to ../../build/seano_telemetry/seano_telemetry.egg-info/top_level.txt
+[3.761s] writing manifest file '../../build/seano_telemetry/seano_telemetry.egg-info/SOURCES.txt'
+[3.766s] reading manifest file '../../build/seano_telemetry/seano_telemetry.egg-info/SOURCES.txt'
+[3.767s] writing manifest file '../../build/seano_telemetry/seano_telemetry.egg-info/SOURCES.txt'
+[3.768s] running build
+[3.768s] running build_py
+[3.768s] creating /home/seano/Seano_ws/build/seano_telemetry/build
+[3.768s] creating /home/seano/Seano_ws/build/seano_telemetry/build/lib
+[3.768s] creating /home/seano/Seano_ws/build/seano_telemetry/build/lib/seano_telemetry
+[3.769s] copying seano_telemetry/telemetry_node.py -> /home/seano/Seano_ws/build/seano_telemetry/build/lib/seano_telemetry
+[3.769s] copying seano_telemetry/__init__.py -> /home/seano/Seano_ws/build/seano_telemetry/build/lib/seano_telemetry
+[3.769s] running install
+[3.770s] running install_lib
+[3.772s] creating /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano_telemetry
+[3.773s] copying /home/seano/Seano_ws/build/seano_telemetry/build/lib/seano_telemetry/telemetry_node.py -> /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano_telemetry
+[3.773s] copying /home/seano/Seano_ws/build/seano_telemetry/build/lib/seano_telemetry/__init__.py -> /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano_telemetry
+[3.776s] byte-compiling /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano_telemetry/telemetry_node.py to telemetry_node.cpython-310.pyc
+[3.778s] byte-compiling /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano_telemetry/__init__.py to __init__.cpython-310.pyc
+[3.778s] running install_data
+[3.778s] creating /home/seano/Seano_ws/install/seano_telemetry/share/ament_index
+[3.779s] creating /home/seano/Seano_ws/install/seano_telemetry/share/ament_index/resource_index
+[3.779s] creating /home/seano/Seano_ws/install/seano_telemetry/share/ament_index/resource_index/packages
+[3.779s] copying resource/seano_telemetry -> /home/seano/Seano_ws/install/seano_telemetry/share/ament_index/resource_index/packages
+[3.779s] copying package.xml -> /home/seano/Seano_ws/install/seano_telemetry/share/seano_telemetry
+[3.779s] running install_egg_info
+[3.823s] Copying ../../build/seano_telemetry/seano_telemetry.egg-info to /home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages/seano_telemetry-0.0.0-py3.10.egg-info
+[3.825s] running install_scripts
+[3.927s] Installing telemetry_node script to /home/seano/Seano_ws/install/seano_telemetry/lib/seano_telemetry
+[3.928s] writing list of installed files to '/home/seano/Seano_ws/build/seano_telemetry/install.log'
+[4.052s] Invoked command in '/home/seano/Seano_ws/src/seano_telemetry' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_telemetry/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_telemetry/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_telemetry build --build-base /home/seano/Seano_ws/build/seano_telemetry/build install --record /home/seano/Seano_ws/build/seano_telemetry/install.log --single-version-externally-managed install_data

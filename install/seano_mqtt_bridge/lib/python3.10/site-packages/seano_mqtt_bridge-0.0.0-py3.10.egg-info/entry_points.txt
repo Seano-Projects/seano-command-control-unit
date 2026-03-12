@@ -1,0 +1,4 @@
+[console_scripts]
+mqtt_bridge_node = seano_mqtt_bridge.mqtt_bridge_node:main
+mqtt_status_node = seano_mqtt_bridge.mqtt_status_node:main
+

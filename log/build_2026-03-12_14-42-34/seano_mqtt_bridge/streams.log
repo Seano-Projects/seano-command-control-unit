@@ -1,0 +1,29 @@
+[1.830s] Invoking command in '/home/seano/Seano_ws/src/seano_mqtt_bridge': PYTHONPATH=/home/seano/Seano_ws/build/seano_mqtt_bridge/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_mqtt_bridge build --build-base /home/seano/Seano_ws/build/seano_mqtt_bridge/build install --record /home/seano/Seano_ws/build/seano_mqtt_bridge/install.log --single-version-externally-managed install_data
+[2.519s] running egg_info
+[2.524s] writing ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/PKG-INFO
+[2.525s] writing dependency_links to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/dependency_links.txt
+[2.525s] writing entry points to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/entry_points.txt
+[2.526s] writing requirements to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/requires.txt
+[2.526s] writing top-level names to ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/top_level.txt
+[2.531s] reading manifest file '../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/SOURCES.txt'
+[2.535s] writing manifest file '../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info/SOURCES.txt'
+[2.536s] running build
+[2.536s] running build_py
+[2.536s] copying seano_mqtt_bridge/mqtt_status_node.py -> /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge
+[2.537s] running install
+[2.538s] running install_lib
+[2.540s] copying /home/seano/Seano_ws/build/seano_mqtt_bridge/build/lib/seano_mqtt_bridge/mqtt_status_node.py -> /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge
+[2.542s] byte-compiling /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge/mqtt_status_node.py to mqtt_status_node.cpython-310.pyc
+[2.545s] running install_data
+[2.545s] creating /home/seano/Seano_ws/install/seano_mqtt_bridge/share/seano_mqtt_bridge/launch
+[2.546s] copying launch/mqtt_status.launch.py -> /home/seano/Seano_ws/install/seano_mqtt_bridge/share/seano_mqtt_bridge/launch
+[2.546s] creating /home/seano/Seano_ws/install/seano_mqtt_bridge/share/seano_mqtt_bridge/config
+[2.546s] copying config/mqtt_status.yaml -> /home/seano/Seano_ws/install/seano_mqtt_bridge/share/seano_mqtt_bridge/config
+[2.546s] running install_egg_info
+[2.552s] removing '/home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge-0.0.0-py3.10.egg-info' (and everything under it)
+[2.560s] Copying ../../build/seano_mqtt_bridge/seano_mqtt_bridge.egg-info to /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages/seano_mqtt_bridge-0.0.0-py3.10.egg-info
+[2.562s] running install_scripts
+[2.618s] Installing mqtt_bridge_node script to /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/seano_mqtt_bridge
+[2.618s] Installing mqtt_status_node script to /home/seano/Seano_ws/install/seano_mqtt_bridge/lib/seano_mqtt_bridge
+[2.620s] writing list of installed files to '/home/seano/Seano_ws/build/seano_mqtt_bridge/install.log'
+[2.726s] Invoked command in '/home/seano/Seano_ws/src/seano_mqtt_bridge' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_mqtt_bridge/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_mqtt_bridge/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_mqtt_bridge build --build-base /home/seano/Seano_ws/build/seano_mqtt_bridge/build install --record /home/seano/Seano_ws/build/seano_mqtt_bridge/install.log --single-version-externally-managed install_data

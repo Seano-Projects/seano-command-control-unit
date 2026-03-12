@@ -1,0 +1,17 @@
+running develop
+running egg_info
+writing seano_logging.egg-info/PKG-INFO
+writing dependency_links to seano_logging.egg-info/dependency_links.txt
+writing entry points to seano_logging.egg-info/entry_points.txt
+writing requirements to seano_logging.egg-info/requires.txt
+writing top-level names to seano_logging.egg-info/top_level.txt
+reading manifest file 'seano_logging.egg-info/SOURCES.txt'
+writing manifest file 'seano_logging.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/seano/Seano_ws/install/seano_logging/lib/python3.10/site-packages/seano-logging.egg-link (link to .)
+Installing telemetry_logger_node script to /home/seano/Seano_ws/install/seano_logging/lib/seano_logging
+
+Installed /home/seano/Seano_ws/build/seano_logging
+running symlink_data
+symbolically linking /home/seano/Seano_ws/build/seano_logging/resource/seano_logging -> /home/seano/Seano_ws/install/seano_logging/share/ament_index/resource_index/packages
+symbolically linking /home/seano/Seano_ws/build/seano_logging/package.xml -> /home/seano/Seano_ws/install/seano_logging/share/seano_logging

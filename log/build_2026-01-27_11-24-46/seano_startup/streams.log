@@ -1,0 +1,37 @@
+[1.927s] Invoking command in '/home/seano/Seano_ws/src/seano_startup': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_startup build --build-base /home/seano/Seano_ws/build/seano_startup/build install --record /home/seano/Seano_ws/build/seano_startup/install.log --single-version-externally-managed install_data
+[2.613s] running egg_info
+[2.615s] creating ../../build/seano_startup/seano_startup.egg-info
+[2.616s] writing ../../build/seano_startup/seano_startup.egg-info/PKG-INFO
+[2.616s] writing dependency_links to ../../build/seano_startup/seano_startup.egg-info/dependency_links.txt
+[2.616s] writing entry points to ../../build/seano_startup/seano_startup.egg-info/entry_points.txt
+[2.617s] writing requirements to ../../build/seano_startup/seano_startup.egg-info/requires.txt
+[2.617s] writing top-level names to ../../build/seano_startup/seano_startup.egg-info/top_level.txt
+[2.617s] writing manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+[2.623s] reading manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+[2.624s] writing manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+[2.624s] running build
+[2.625s] running build_py
+[2.625s] creating /home/seano/Seano_ws/build/seano_startup/build
+[2.625s] creating /home/seano/Seano_ws/build/seano_startup/build/lib
+[2.625s] creating /home/seano/Seano_ws/build/seano_startup/build/lib/seano_startup
+[2.626s] copying seano_startup/__init__.py -> /home/seano/Seano_ws/build/seano_startup/build/lib/seano_startup
+[2.626s] running install
+[2.627s] running install_lib
+[2.629s] creating /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup
+[2.630s] copying /home/seano/Seano_ws/build/seano_startup/build/lib/seano_startup/__init__.py -> /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup
+[2.632s] byte-compiling /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup/__init__.py to __init__.cpython-310.pyc
+[2.632s] running install_data
+[2.633s] creating /home/seano/Seano_ws/install/seano_startup/share/ament_index
+[2.633s] creating /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index
+[2.633s] creating /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index/packages
+[2.633s] copying resource/seano_startup -> /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index/packages
+[2.634s] copying package.xml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup
+[2.634s] creating /home/seano/Seano_ws/install/seano_startup/share/seano_startup/launch
+[2.634s] copying launch/system.launch.py -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/launch
+[2.634s] creating /home/seano/Seano_ws/install/seano_startup/share/seano_startup/config
+[2.635s] copying config/system.yaml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/config
+[2.635s] running install_egg_info
+[2.641s] Copying ../../build/seano_startup/seano_startup.egg-info to /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup-0.0.0-py3.10.egg-info
+[2.643s] running install_scripts
+[2.703s] writing list of installed files to '/home/seano/Seano_ws/build/seano_startup/install.log'
+[2.819s] Invoked command in '/home/seano/Seano_ws/src/seano_startup' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_startup/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_startup build --build-base /home/seano/Seano_ws/build/seano_startup/build install --record /home/seano/Seano_ws/build/seano_startup/install.log --single-version-externally-managed install_data

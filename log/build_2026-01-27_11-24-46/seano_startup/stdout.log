@@ -1,0 +1,35 @@
+running egg_info
+creating ../../build/seano_startup/seano_startup.egg-info
+writing ../../build/seano_startup/seano_startup.egg-info/PKG-INFO
+writing dependency_links to ../../build/seano_startup/seano_startup.egg-info/dependency_links.txt
+writing entry points to ../../build/seano_startup/seano_startup.egg-info/entry_points.txt
+writing requirements to ../../build/seano_startup/seano_startup.egg-info/requires.txt
+writing top-level names to ../../build/seano_startup/seano_startup.egg-info/top_level.txt
+writing manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+reading manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+writing manifest file '../../build/seano_startup/seano_startup.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/seano/Seano_ws/build/seano_startup/build
+creating /home/seano/Seano_ws/build/seano_startup/build/lib
+creating /home/seano/Seano_ws/build/seano_startup/build/lib/seano_startup
+copying seano_startup/__init__.py -> /home/seano/Seano_ws/build/seano_startup/build/lib/seano_startup
+running install
+running install_lib
+creating /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup
+copying /home/seano/Seano_ws/build/seano_startup/build/lib/seano_startup/__init__.py -> /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup
+byte-compiling /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/seano/Seano_ws/install/seano_startup/share/ament_index
+creating /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index
+creating /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index/packages
+copying resource/seano_startup -> /home/seano/Seano_ws/install/seano_startup/share/ament_index/resource_index/packages
+copying package.xml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup
+creating /home/seano/Seano_ws/install/seano_startup/share/seano_startup/launch
+copying launch/system.launch.py -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/launch
+creating /home/seano/Seano_ws/install/seano_startup/share/seano_startup/config
+copying config/system.yaml -> /home/seano/Seano_ws/install/seano_startup/share/seano_startup/config
+running install_egg_info
+Copying ../../build/seano_startup/seano_startup.egg-info to /home/seano/Seano_ws/install/seano_startup/lib/python3.10/site-packages/seano_startup-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/seano/Seano_ws/build/seano_startup/install.log'

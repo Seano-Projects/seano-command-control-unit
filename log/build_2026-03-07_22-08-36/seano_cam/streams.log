@@ -1,0 +1,37 @@
+[1.751s] Invoking command in '/home/seano/Seano_ws/src/seano_cam': PYTHONPATH=/home/seano/Seano_ws/build/seano_cam/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_cam build --build-base /home/seano/Seano_ws/build/seano_cam/build install --record /home/seano/Seano_ws/build/seano_cam/install.log --single-version-externally-managed install_data
+[2.412s] running egg_info
+[2.413s] creating ../../build/seano_cam/seano_cam.egg-info
+[2.413s] writing ../../build/seano_cam/seano_cam.egg-info/PKG-INFO
+[2.414s] writing dependency_links to ../../build/seano_cam/seano_cam.egg-info/dependency_links.txt
+[2.414s] writing entry points to ../../build/seano_cam/seano_cam.egg-info/entry_points.txt
+[2.415s] writing requirements to ../../build/seano_cam/seano_cam.egg-info/requires.txt
+[2.415s] writing top-level names to ../../build/seano_cam/seano_cam.egg-info/top_level.txt
+[2.416s] writing manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'
+[2.420s] reading manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'
+[2.421s] writing manifest file '../../build/seano_cam/seano_cam.egg-info/SOURCES.txt'
+[2.422s] running build
+[2.422s] running build_py
+[2.423s] creating /home/seano/Seano_ws/build/seano_cam/build
+[2.423s] creating /home/seano/Seano_ws/build/seano_cam/build/lib
+[2.423s] creating /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam
+[2.424s] copying seano_cam/camera_node.py -> /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam
+[2.424s] copying seano_cam/__init__.py -> /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam
+[2.424s] running install
+[2.424s] running install_lib
+[2.427s] creating /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam
+[2.427s] copying /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam/camera_node.py -> /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam
+[2.428s] copying /home/seano/Seano_ws/build/seano_cam/build/lib/seano_cam/__init__.py -> /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam
+[2.429s] byte-compiling /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam/camera_node.py to camera_node.cpython-310.pyc
+[2.432s] byte-compiling /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam/__init__.py to __init__.cpython-310.pyc
+[2.433s] running install_data
+[2.433s] creating /home/seano/Seano_ws/install/seano_cam/share/ament_index
+[2.433s] creating /home/seano/Seano_ws/install/seano_cam/share/ament_index/resource_index
+[2.434s] creating /home/seano/Seano_ws/install/seano_cam/share/ament_index/resource_index/packages
+[2.434s] copying resource/seano_cam -> /home/seano/Seano_ws/install/seano_cam/share/ament_index/resource_index/packages
+[2.434s] copying package.xml -> /home/seano/Seano_ws/install/seano_cam/share/seano_cam
+[2.434s] running install_egg_info
+[2.443s] Copying ../../build/seano_cam/seano_cam.egg-info to /home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages/seano_cam-0.0.0-py3.10.egg-info
+[2.446s] running install_scripts
+[2.504s] Installing camera_node script to /home/seano/Seano_ws/install/seano_cam/lib/seano_cam
+[2.504s] writing list of installed files to '/home/seano/Seano_ws/build/seano_cam/install.log'
+[2.615s] Invoked command in '/home/seano/Seano_ws/src/seano_cam' returned '0': PYTHONPATH=/home/seano/Seano_ws/build/seano_cam/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/seano/Seano_ws/install/seano_cam/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/seano_cam build --build-base /home/seano/Seano_ws/build/seano_cam/build install --record /home/seano/Seano_ws/build/seano_cam/install.log --single-version-externally-managed install_data
