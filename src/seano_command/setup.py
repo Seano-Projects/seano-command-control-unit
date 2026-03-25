@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'paho-mqtt'],
     zip_safe=True,
     maintainer='seano',
     maintainer_email='seano@todo.todo',
