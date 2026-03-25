@@ -66,19 +66,23 @@ class SeanoFailsafeNode(Node):
         self.declare_parameter('failsafe.system.failsafe_mode', 'RTL')  # RTL, LOITER, LAND
         self.declare_parameter('failsafe.system.notification_delay', 2.0)  # seconds before action
         self.declare_parameter('failsafe.system.recovery_delay', 10.0)  # seconds to wait for recovery
+        self.declare_parameter('failsafe.system.mode_enforce_interval', 2.0)  # seconds
         
         self.battery_failsafe_enabled = self.get_parameter('failsafe.system.battery_failsafe_enabled').value
         self.comm_failsafe_enabled = self.get_parameter('failsafe.system.communication_failsafe_enabled').value
         self.failsafe_mode = self.get_parameter('failsafe.system.failsafe_mode').value
         self.notification_delay = self.get_parameter('failsafe.system.notification_delay').value
         self.recovery_delay = self.get_parameter('failsafe.system.recovery_delay').value
+        self.mode_enforce_interval = self.get_parameter('failsafe.system.mode_enforce_interval').value
         
         # State variables
         self.battery_critical = False
         self.comm_critical = False
         self.failsafe_active = False
         self.failsafe_triggered_time = None
+        self.recovery_started_time = None
         self.mode_changed = False
+        self.last_mode_enforce_time = 0.0
         
         self.current_voltage = 0.0
         self.comm_status = 'unknown'
@@ -131,6 +135,7 @@ class SeanoFailsafeNode(Node):
         failsafe_needed = self.battery_critical or self.comm_critical
         
         if failsafe_needed and not self.failsafe_active:
+            self.recovery_started_time = None
             # Start failsafe procedure
             if self.failsafe_triggered_time is None:
                 self.failsafe_triggered_time = time.time()
@@ -143,15 +148,21 @@ class SeanoFailsafeNode(Node):
             elapsed = time.time() - self.failsafe_triggered_time
             if elapsed >= self.notification_delay:
                 self.activate_failsafe()
+
+        elif failsafe_needed and self.failsafe_active:
+            # While condition is still critical, keep failsafe mode enforced.
+            self.recovery_started_time = None
+            self.enforce_failsafe_mode()
         
         elif not failsafe_needed and self.failsafe_active:
             # Check if conditions have been good for recovery_delay
-            if self.failsafe_triggered_time is not None:
-                elapsed_recovery = time.time() - self.failsafe_triggered_time
+            if self.recovery_started_time is None:
+                self.recovery_started_time = time.time()
+                self.get_logger().info('Failsafe condition cleared, waiting recovery delay...')
+            else:
+                elapsed_recovery = time.time() - self.recovery_started_time
                 if elapsed_recovery >= self.recovery_delay:
                     self.deactivate_failsafe()
-            else:
-                self.deactivate_failsafe()
         
         elif not failsafe_needed and self.failsafe_triggered_time is not None:
             # Condition cleared before triggering
@@ -167,6 +178,7 @@ class SeanoFailsafeNode(Node):
             return
         
         self.failsafe_active = True
+        self.last_mode_enforce_time = 0.0
         self.get_logger().error('=' * 60)
         self.get_logger().error('FAILSAFE ACTIVATED!')
         self.get_logger().error('=' * 60)
@@ -187,8 +199,8 @@ class SeanoFailsafeNode(Node):
         # Wait a moment for notification to be sent
         time.sleep(0.5)
         
-        # Change flight mode
-        self.change_flight_mode(self.failsafe_mode)
+        # Change flight mode immediately, then keep enforcing while active.
+        self.enforce_failsafe_mode(force=True)
         
         # Publish emergency stop
         emergency_msg = Bool()
@@ -213,6 +225,7 @@ class SeanoFailsafeNode(Node):
         
         self.failsafe_active = False
         self.failsafe_triggered_time = None
+        self.recovery_started_time = None
         self.mode_changed = False
         
         self.get_logger().info('Failsafe deactivated - conditions recovered')
@@ -273,8 +286,8 @@ class SeanoFailsafeNode(Node):
             self.get_logger().error('Cannot change mode - Mavros not connected!')
             return False
         
-        if self.mode_changed:
-            self.get_logger().warn(f'Mode already changed to {self.failsafe_mode}')
+        if str(self.current_mavros_mode).upper() == str(mode).upper():
+            self.mode_changed = True
             return True
         
         self.get_logger().warn(f'Changing flight mode to {mode}...')
@@ -301,6 +314,22 @@ class SeanoFailsafeNode(Node):
         except Exception as e:
             self.get_logger().error(f'Error changing flight mode: {str(e)}')
             return False
+
+    def enforce_failsafe_mode(self, force=False):
+        """Keep FCU in failsafe mode while failsafe condition remains active."""
+        if not self.failsafe_active:
+            return
+
+        if str(self.current_mavros_mode).upper() == str(self.failsafe_mode).upper():
+            self.mode_changed = True
+            return
+
+        now = time.time()
+        if (not force) and ((now - self.last_mode_enforce_time) < self.mode_enforce_interval):
+            return
+
+        self.last_mode_enforce_time = now
+        self.change_flight_mode(self.failsafe_mode)
     
     def publish_status(self):
         """Publish failsafe status"""

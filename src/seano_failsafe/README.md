@@ -9,6 +9,8 @@ Package ini menyediakan sistem failsafe untuk SEANO dengan 2 trigger utama:
 ### 1. seano_battery
 Node untuk monitoring battery dari ESP32 via UART (serial communication).
 
+Node ini juga mendukung mode simulasi battery via MQTT untuk kebutuhan pengujian sebelum hardware battery siap.
+
 **Data dari ESP32:**
 - Format JSON: `{"voltage": 12.5, "current": 2.3}`
 - Atau format simple: `V:12.5,A:2.3`
@@ -21,6 +23,9 @@ Node untuk monitoring battery dari ESP32 via UART (serial communication).
 - `/seano/battery/status` (String): Status (normal, low, critical, full)
 - `/seano/battery/low_alert` (Bool): Alert ketika voltage critical
 
+**Subscribed Topics (Simulation):**
+- `seano/{vehicle_id}/simulation/battery` (MQTT JSON): Inject data battery simulasi
+
 **Parameters:**
 - `failsafe.battery.serial_port` (string, default: /dev/ttyTHS0): Port serial ESP32
 - `failsafe.battery.baudrate` (int, default: 115200): Baudrate serial
@@ -29,6 +34,13 @@ Node untuk monitoring battery dari ESP32 via UART (serial communication).
 - `failsafe.battery.max_voltage` (float, default: 12.6): Voltage maximum (100%)
 - `failsafe.battery.low_voltage_threshold` (float, default: 11.1): Threshold low voltage
 - `failsafe.battery.critical_voltage_threshold` (float, default: 10.8): Threshold critical
+- `failsafe.battery.simulation_enabled` (bool, default: true): Enable listener simulasi battery via MQTT
+- `failsafe.battery.simulation_timeout` (float, default: 5.0): Timeout override simulasi (detik)
+
+Parameter MQTT dan vehicle mengikuti parameter global system:
+- `vehicle.id`
+- `mqtt.broker`, `mqtt.port`, `mqtt.username`, `mqtt.password`
+- `mqtt.base_topic`, `mqtt.qos`, `mqtt.keepalive`, `mqtt.use_tls`, `mqtt.tls_insecure`
 
 ### 2. seano_communication_monitor
 Node untuk monitoring kekuatan sinyal komunikasi dari **WiFi, GSM, dan Ethernet**.
@@ -93,6 +105,7 @@ Node utama untuk handle failsafe procedures.
 - `failsafe.system.failsafe_mode` (string, default: RTL): Mode untuk failsafe (RTL, LOITER, LAND)
 - `failsafe.system.notification_delay` (float, default: 2.0): Delay sebelum action (detik)
 - `failsafe.system.recovery_delay` (float, default: 10.0): Delay untuk recovery (detik)
+- `failsafe.system.mode_enforce_interval` (float, default: 2.0): Interval re-apply mode failsafe saat kondisi critical masih aktif
 
 ## Dependencies
 
@@ -179,6 +192,102 @@ ros2 topic echo /seano/communication/ethernet/link
 ros2 topic echo /seano/failsafe/status
 ros2 topic echo /seano/failsafe/event
 ```
+
+## Simulasi Battery untuk Trigger RTL
+
+Jika baterai fisik belum terpasang, Anda bisa injeksi data battery simulasi melalui MQTT.
+
+Topic default (dari `vehicle.id=USV-001`):
+
+```text
+seano/USV-001/simulation/battery
+```
+
+Contoh payload normal:
+
+```json
+{"voltage": 12.1, "current": 1.8}
+```
+
+Contoh payload critical (memicu failsafe):
+
+```json
+{"voltage": 10.7, "current": 2.2}
+```
+
+Publish contoh:
+
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/simulation/battery' -m '{"voltage":10.7,"current":2.2}'
+```
+
+Perilaku sistem:
+1. `seano_battery` menerima data simulasi dan publish ke topic battery ROS.
+2. Jika voltage <= `failsafe.battery.critical_voltage_threshold`, topic `/seano/battery/low_alert` menjadi `true`.
+3. `seano_failsafe` mendeteksi kondisi critical, menunggu `failsafe.system.notification_delay`, lalu set mode MAVROS ke `failsafe.system.failsafe_mode` (default: RTL).
+
+### Langkah-Langkah Uji Simulation Battery Failsafe
+
+1. Build package lalu source environment:
+
+```bash
+cd /home/seano/Seano_ws
+colcon build --packages-select seano_failsafe seano_startup
+source /opt/ros/humble/setup.bash
+source /home/seano/Seano_ws/install/setup.bash
+```
+
+2. Jalankan node battery (terminal 1):
+
+```bash
+ros2 run seano_failsafe seano_battery --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+3. Jalankan node failsafe (terminal 2):
+
+```bash
+ros2 run seano_failsafe seano_failsafe --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+4. Monitor status failsafe (terminal 3):
+
+```bash
+ros2 topic echo /seano/failsafe/status
+```
+
+5. Monitor event failsafe (terminal 4):
+
+```bash
+ros2 topic echo /seano/failsafe/event
+```
+
+6. Kirim simulasi battery normal (opsional, untuk baseline):
+
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/simulation/battery' -m '{"voltage":12.2,"current":1.5}'
+```
+
+7. Kirim simulasi battery critical (trigger failsafe):
+
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/simulation/battery' -m '{"voltage":10.7,"current":2.2}'
+```
+
+8. Verifikasi hasil:
+- Topic `/seano/battery/low_alert` menjadi `true`
+- Topic `/seano/failsafe/status` berubah dari `PENDING` ke `ACTIVE`
+- Topic `/seano/failsafe/event` memuat event `failsafe_activated`
+- Mode MAVROS berubah ke mode failsafe (default: RTL)
+
+9. Uji recovery (opsional): kirim lagi nilai aman dan tunggu `failsafe.system.recovery_delay`.
+
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/simulation/battery' -m '{"voltage":12.0,"current":1.3}'
+```
+
+Expected:
+- `/seano/failsafe/status` kembali `INACTIVE`
+- `/seano/failsafe/event` memuat `failsafe_deactivated`
 
 ## ESP32 Serial Format
 
