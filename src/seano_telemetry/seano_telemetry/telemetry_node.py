@@ -13,7 +13,7 @@ class TelemetryNode(Node):
 
         # Declare parameters
         self.declare_parameter('system.mode', 'unknown')
-        self.declare_parameter('vehicle.id', 'unknown')
+        self.declare_parameter('vehicle.id', 'USV-001')
 
         self.system_mode = self.get_parameter('system.mode').value
         self.vehicle_id = self.get_parameter('vehicle.id').value
@@ -138,7 +138,7 @@ class TelemetryNode(Node):
         """Callback for battery status (sensor_msgs/BatteryState)"""
         self.battery_voltage = msg.voltage
         self.battery_current = msg.current
-        self.battery_percentage = int(msg.percentage) if msg.percentage >= 0 else 0
+        self.battery_percentage = round(msg.percentage * 100, 1) if msg.percentage >= 0 else 0.0
 
     def vfr_callback(self, msg):
         """Callback for VFR HUD (speed)"""
@@ -215,7 +215,7 @@ class TelemetryNode(Node):
             "roll": round(self.roll, 1),
             "pitch": round(self.pitch, 1),
             "yaw": round(self.yaw, 1),
-            "temperature_system": round(self.temperature_system, 1)
+            "temperature_system": f"{round(self.temperature_system, 1)}"
         }
         
         msg = String()

@@ -79,6 +79,14 @@ def generate_launch_description():
             ),
 
             Node(
+                package='seano_oceanography',
+                executable='ctd_sensor_node',
+                name='ctd_sensor',
+                parameters=[param_file],
+                output='screen'
+            ),
+
+            Node(
                 package='seano_failsafe',
                 executable='seano_battery',
                 name='battery',

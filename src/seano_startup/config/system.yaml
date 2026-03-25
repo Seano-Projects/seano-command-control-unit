@@ -51,6 +51,19 @@
       keepalive: 60
       heartbeat_interval: 30.0
 
+    oceanography:
+      ctd:
+        sensor_code: CTD-MIDAS-3000
+        timezone: Asia/Jakarta
+        gps_topic: /mavros/global_position/global
+        default_latitude: -6.2000000
+        default_longitude: 106.8166667
+        default_altitude: 0.0
+        publish_topic: oceanography/ctd
+        publish_rate_hz: 1.0
+        max_depth_m: 120.0
+        cycle_seconds: 120.0
+
     failsafe:
       battery:
         serial_port: /dev/ttyTHS0

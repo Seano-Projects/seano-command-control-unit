@@ -7,6 +7,7 @@ Workspace untuk sistem USV (Unmanned Surface Vehicle) berbasis ROS 2 Humble.
 - **seano_command** - Command handling untuk kontrol USV
 - **seano_logging** - Logging telemetry data
 - **seano_mqtt_bridge** - Bridge antara ROS 2 dan MQTT
+- **seano_oceanography** - Node sensor oceanography (CTD, ADCP, SBES)
 - **seano_startup** - Launch files untuk startup sistem
 - **seano_telemetry** - Telemetry data processing
 
@@ -36,7 +37,7 @@ ros2 launch seano_startup system.launch.py
 ```
 
 Launch file ini akan menjalankan:
-- **MAVROS** - Koneksi ke flight controller (FCU: `/dev/ttyACM0:115200`, GCS: `udp://@0.0.0.0:14550`)
+- **MAVROS** - Koneksi ke flight controller (FCU: `/dev/ttyACM0:57600`, GCS: `udp://@0.0.0.0:14550`)
 - **Telemetry Node** - Processing data telemetry
 - **Telemetry Logger** - Logging telemetry ke file
 - **MQTT Bridge** - Bridge untuk komunikasi MQTT
@@ -54,6 +55,75 @@ ros2 run seano_logging telemetry_logger_node
 
 # MQTT bridge
 ros2 run seano_mqtt_bridge mqtt_bridge_node
+
+# CTD oceanography sensor
+ros2 run seano_oceanography ctd_sensor_node --ros-args --params-file src/seano_startup/config/system.yaml
+```
+
+## Menjalankan Seano Oceanography (CTD)
+
+### 1) Build package yang diperlukan
+
+```bash
+cd /home/seano/Seano_ws
+colcon build --packages-select seano_oceanography seano_startup
+```
+
+### 2) Source environment
+
+```bash
+source /opt/ros/humble/setup.bash
+source /home/seano/Seano_ws/install/setup.bash
+```
+
+### 3) Jalankan generator data CTD
+
+```bash
+ros2 run seano_oceanography ctd_sensor_node --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+### 4) Monitor data ROS
+
+```bash
+ros2 topic echo /oceanography/ctd
+```
+
+### 5) Monitor data MQTT
+
+Format topic CTD:
+
+```text
+seano/{vehicle_code}/{sensor_code}/data
+```
+
+Contoh topic dari config default:
+
+```text
+seano/USV-001/CTD-MIDAS-3000/data
+```
+
+Subscribe topic MQTT:
+
+```bash
+mosquitto_sub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/CTD-MIDAS-3000/data'
+```
+
+Contoh payload CTD:
+
+```json
+{
+  "date_time": "2026-03-17T18:30:12+07:00",
+  "vehicle_code": "USV-001",
+  "sensor_code": "CTD-MIDAS-3000",
+  "sensor": "CTD",
+  "depth_m": 53.21,
+  "pressure_m": 54.27,
+  "temperature_c": 26.44,
+  "conductivity_ms_cm": 50.84,
+  "salinity_psu": 33.12,
+  "density_kg_m3": 1020.73,
+  "sound_velocity_ms": 1535.47
+}
 ```
 
 ## Konfigurasi
@@ -62,6 +132,15 @@ File konfigurasi sistem berada di:
 ```
 src/seano_startup/config/system.yaml
 ```
+
+Parameter CTD yang dipakai:
+- `vehicle.id`
+- `oceanography.ctd.sensor_code`
+- `oceanography.ctd.timezone`
+- `oceanography.ctd.publish_topic`
+- `oceanography.ctd.publish_rate_hz`
+- `oceanography.ctd.max_depth_m`
+- `oceanography.ctd.cycle_seconds`
 
 ## Debug & Monitoring
 
