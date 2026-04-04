@@ -1,31 +1,39 @@
 # seano_command
 
-Node ROS2 untuk menerima command dan waypoint dari MQTT, lalu meneruskannya ke MAVROS.
+Package ROS2 yang terdiri dari 3 node terpisah untuk menerima perintah dari MQTT dan meneruskannya ke MAVROS.
+
+## Node di Package Ini
+
+| Node | File | MQTT Subscribe | Fungsi |
+|---|---|---|---|
+| `command_node` | `command_node.py` | `seano/{vehicle_id}/command` | ARM/DISARM/ganti mode |
+| `waypoint_node` | `waypoint_node.py` | `seano/{vehicle_id}/waypoint` | Upload misi waypoint |
+| `thruster_node` | `thruster_node.py` | `seano/{vehicle_id}/thruster` | Kontrol PWM motor |
 
 ## Fungsi Utama
 
-`command_node` melakukan hal berikut:
+### command_node
+- Subscribe MQTT topic `seano/{vehicle_id}/command`
+- Eksekusi ARM / FORCE_ARM / DISARM / FORCE_DISARM lewat service `/mavros/cmd/command`
+- Ganti mode AUTO / MANUAL / HOLD / LOITER / RTL lewat service `/mavros/set_mode`
+- Publish status ke ROS topic `command_status` dan MQTT `seano/{vehicle_id}/command/response`
 
-1. Subscribe MQTT topic command:
-- `seano/{vehicle_id}/command`
+### waypoint_node
+- Subscribe MQTT topic `seano/{vehicle_id}/waypoint`
+- Upload waypoint ke MAVROS lewat service `/mavros/mission/push`
+- Opsional set home dari waypoint pertama sebelum upload
+- Publish status ke ROS topic `waypoint_status` dan MQTT `seano/{vehicle_id}/waypoint/response`
 
-2. Subscribe MQTT topic waypoint:
-- `seano/{vehicle_id}/waypoint`
-
-3. Eksekusi command ke MAVROS:
-- ARM / FORCE_ARM / DISARM / FORCE_DISARM lewat service `/mavros/cmd/command`
-- AUTO / MANUAL / HOLD / LOITER / RTL lewat service `/mavros/set_mode`
-
-4. Upload waypoint ke MAVROS:
-- Service `/mavros/mission/push`
-
-5. Publish status hasil eksekusi:
-- ROS topic: `command_status` (std_msgs/String berisi JSON)
-- MQTT topic: `seano/{vehicle_id}/status`
+### thruster_node
+- Subscribe MQTT topic `seano/{vehicle_id}/thruster`
+- Publish PWM ke `/mavros/rc/override` (OverrideRCIn)
+- Nilai throttle/steering: -100..100 (0 = netral, PWM 1500 µs)
 
 ## Parameter ROS
 
-Parameter dibaca dari ROS parameter server (umumnya dari `system.yaml`):
+Semua parameter dibaca dari `system.yaml` via ROS parameter server.
+
+### Parameter Umum (semua node)
 
 - `vehicle.id` (default: `UNKNOWN`)
 - `mqtt.broker` (default: `localhost`)
@@ -37,7 +45,19 @@ Parameter dibaca dari ROS parameter server (umumnya dari `system.yaml`):
 - `mqtt.keepalive` (default: `60`)
 - `mqtt.use_tls` (default: `true`)
 - `mqtt.tls_insecure` (default: `true`)
+
+### Parameter waypoint_node
+
 - `mission.auto_set_home_from_first_waypoint` (default: `true`)
+
+### Parameter thruster_node
+
+- `thruster.pwm_neutral` (default: `1500`)
+- `thruster.pwm_min` (default: `1000`)
+- `thruster.pwm_max` (default: `2000`)
+- `thruster.channel_throttle` (default: `2` → CH3, 0-indexed)
+- `thruster.channel_steering` (default: `0` → CH1, 0-indexed)
+- `thruster.allow_reverse` (default: `true`)
 
 ## Format Payload MQTT
 
@@ -127,41 +147,74 @@ Catatan Home Point:
 - Per-payload bisa di-override dengan field `set_home_from_first_waypoint` (hanya untuk Bentuk A).
 - Jika proses set home gagal, upload waypoint dibatalkan untuk menghindari RTL ke home yang salah.
 
-## Tahapan dari Setup Sampai Bisa Start
+## Cara Menjalankan
 
-Urutan cepat dari nol sampai autopilot command bisa dieksekusi:
-
-1. Siapkan dependency ROS2 + MAVROS + broker MQTT.
-
-2. Build package:
+### Build package
 
 ```bash
 cd ~/Seano_ws
 colcon build --packages-select seano_command
-```
-
-3. Source environment ROS2 dan workspace:
-
-```bash
-source /opt/ros/humble/setup.bash
 source ~/Seano_ws/install/setup.bash
 ```
 
-4. Pastikan file parameter ada dan `vehicle.id` sudah benar (default `USV-001`):
+### Opsi 1: Jalan semua sekaligus (rekomendasi)
+
+Ketiga node (`command_node`, `waypoint_node`, `thruster_node`) sudah terdaftar di launch sistem dan otomatis ikut jalan:
 
 ```bash
-cat /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+ros2 launch seano_startup system.launch.py
 ```
 
-5. Start autopilot + MAVROS (SITL atau hardware) sampai service MAVROS aktif.
+### Opsi 2: Jalan hanya seano_command (tanpa package lain)
 
-6. Jalankan node command:
+Gunakan launch file bawaan package ini:
 
 ```bash
-ros2 run seano_command command_node --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+ros2 launch seano_command command.launch.py
 ```
 
-7. Verifikasi service MAVROS tersedia:
+Ini menjalankan ketiga node sekaligus (`command_node`, `waypoint_node`, `thruster_node`) tanpa perlu membuka 3 terminal terpisah.
+
+Bisa juga tentukan file parameter secara eksplisit:
+
+```bash
+ros2 launch seano_command command.launch.py params_file:=~/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+### Opsi 3: Jalan manual satu per satu (untuk debug per node)
+
+Buka 3 terminal terpisah, jalankan masing-masing:
+
+**Terminal 1 — command_node (ARM/DISARM/mode):**
+
+```bash
+ros2 run seano_command command_node --ros-args --params-file ~/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+**Terminal 2 — waypoint_node (upload misi):**
+
+```bash
+ros2 run seano_command waypoint_node --ros-args --params-file ~/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+**Terminal 3 — thruster_node (kontrol PWM motor):**
+
+```bash
+ros2 run seano_command thruster_node --ros-args --params-file ~/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+### Cek node aktif
+
+```bash
+ros2 node list | grep -E 'command|waypoint|thruster'
+```
+
+Harus muncul:
+- `/usv/command`
+- `/usv/waypoint`
+- `/usv/thruster`
+
+### Verifikasi service MAVROS tersedia
 
 ```bash
 ros2 service list | grep mavros
@@ -172,98 +225,59 @@ Minimal harus ada:
 - `/mavros/set_mode`
 - `/mavros/mission/push`
 
-8. Mulai test autopilot dari MQTT:
-- Kirim command mode (misal `AUTO`) ke topic `seano/USV-001/command`
-- Kirim waypoint ke topic `seano/USV-001/waypoint`
-- Pantau hasil di topic `seano/USV-001/status`
 
-9. Kalau status sukses (`Mode changed to AUTO`, `Uploaded N waypoints`), berarti flow dari command sampai autopilot sudah jalan.
 
-Build package:
+## Simulasi / Test dari MQTT (Tanpa Web)
 
+Ketiga node harus sudah jalan (via launch atau manual). Default `vehicle.id` adalah `USV-001`.
+
+### Uji command_node
+
+**Monitor response:**
 ```bash
-cd ~/Seano_ws
-colcon build --packages-select seano_command
+mosquitto_sub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/command/response'
 ```
 
-Source environment:
-
+**Kirim ARM:**
 ```bash
-source ~/Seano_ws/install/setup.bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/command' -m '{"command":"ARM"}'
 ```
 
-Run node langsung:
-
-```bash
-ros2 run seano_command command_node --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
-```
-
-Atau lewat launch sistem:
-
-```bash
-ros2 launch seano_startup system.launch.py
-```
-
-## Simulasi Fitur Autopilot (Tanpa Web)
-
-Bagian ini untuk uji end-to-end fitur autopilot dari MQTT ke MAVROS memakai terminal.
-
-### Prasyarat
-
-1. Autopilot + MAVROS aktif (hardware asli atau SITL), dan service berikut tersedia:
-
-```bash
-ros2 service list | grep mavros
-```
-
-Minimal terlihat:
-- `/mavros/cmd/command`
-- `/mavros/set_mode`
-- `/mavros/mission/push`
-
-2. Node command sudah jalan:
-
-```bash
-ros2 run seano_command command_node --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
-```
-
-3. Sesuaikan topic dengan `vehicle.id`.
-Default di project ini adalah `USV-001`, sehingga topic menjadi:
-- `seano/USV-001/command`
-- `seano/USV-001/waypoint`
-- `seano/USV-001/status`
-
-### Langkah Uji di 3 Terminal
-
-#### Terminal 1: monitor status dari node
-
-```bash
-mosquitto_sub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/status'
-```
-
-#### Terminal 2: kirim mode AUTO
-
+**Kirim mode AUTO:**
 ```bash
 mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/command' -m '{"command":"AUTO"}'
 ```
 
-#### Terminal 3: kirim waypoint
+### Uji waypoint_node
 
-Contoh payload bentuk object dengan key `waypoints`:
+**Monitor response:**
+```bash
+mosquitto_sub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/waypoint/response'
+```
 
+**Kirim waypoint:**
 ```bash
 mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/waypoint' -m '{"waypoints":[{"lat":-6.2001,"lon":106.8167,"alt":0.0},{"lat":-6.2005,"lon":106.8172,"alt":0.0}]}'
 ```
 
-### Verifikasi Berhasil
+### Uji thruster_node
 
-1. Di status MQTT muncul pesan sukses, misalnya:
-- `Mode changed to AUTO`
-- `Uploaded 2 waypoints`
+**Maju 60%, belok kiri 20%:**
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/thruster' -m '{"throttle":60,"steering":-20}'
+```
 
-2. Di log node terlihat proses subscribe, eksekusi mode, dan upload waypoint.
+**Berhenti (netral):**
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/thruster' -m '{"throttle":0,"steering":0}'
+```
 
-3. Opsional cek mission di MAVROS:
+**Lepas override (kembalikan ke RC fisik):**
+```bash
+mosquitto_pub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/thruster' -m '{"release":true}'
+```
+
+### Cek mission di MAVROS (setelah upload waypoint)
 
 ```bash
 ros2 service call /mavros/mission/pull mavros_msgs/srv/WaypointPull '{}'
@@ -271,9 +285,8 @@ ros2 service call /mavros/mission/pull mavros_msgs/srv/WaypointPull '{}'
 
 ### Catatan Penting untuk USV
 
-- Untuk kapal, navigasi waypoint utamanya berdasarkan latitude dan longitude.
-- Field altitude tetap diparsing dan dikirim ke MAVROS, namun umumnya tidak dominan pada kontrol gerak USV.
-- Jika ragu, isi altitude dengan `0.0` agar payload konsisten.
+- Navigasi waypoint utamanya berdasarkan latitude dan longitude, isi altitude `0.0`.
+- Thruster nilai `0` = netral (PWM 1500 µs), bukan berhenti mendadak.
 
 ## Catatan Integrasi Web
 
@@ -285,6 +298,10 @@ Agar command/waypoint dari web masuk ke node ini:
 
 ## File Penting
 
-- Node utama: `seano_command/command_node.py`
-- Metadata package: `package.xml`
-- Entry point Python: `setup.py`
+| File | Keterangan |
+|---|---|
+| `seano_command/command_node.py` | Node ARM/DISARM/mode |
+| `seano_command/waypoint_node.py` | Node upload waypoint |
+| `seano_command/thruster_node.py` | Node kontrol PWM motor |
+| `package.xml` | Metadata package |
+| `setup.py` | Entry point ketiga node |

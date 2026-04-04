@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'seano_battery = seano_failsafe.seano_battery:main',
+            'seano_battery_dummy = seano_failsafe.seano_battery_dummy:main',
             'seano_failsafe = seano_failsafe.seano_failsafe:main',
             'seano_communication_monitor = seano_failsafe.seano_communication_monitor:main',
         ],

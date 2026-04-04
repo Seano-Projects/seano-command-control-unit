@@ -11,6 +11,10 @@ Node untuk monitoring battery dari ESP32 via UART (serial communication).
 
 Node ini juga mendukung mode simulasi battery via MQTT untuk kebutuhan pengujian sebelum hardware battery siap.
 
+Mode baru (tanpa hardware): aktifkan `failsafe.battery.use_internal_dummy=true`.
+Generator data battery realistis berjalan di node `seano_battery` yang sama,
+dengan persentase turun bertahap dari 100% dan kirim JSON ke MQTT topic `seano/{vehicle_id}/battery`.
+
 **Data dari ESP32:**
 - Format JSON: `{"voltage": 12.5, "current": 2.3}`
 - Atau format simple: `V:12.5,A:2.3`
@@ -78,6 +82,39 @@ Node untuk monitoring kekuatan sinyal komunikasi dari **WiFi, GSM, dan Ethernet*
 
 ### 3. seano_failsafe
 Node utama untuk handle failsafe procedures.
+
+### 4. Internal Dummy Battery (di seano_battery)
+Generator battery simulasi tanpa hardware di node `seano_battery` yang sama.
+
+**Fungsi:**
+- Generate data battery realistis (persentase turun bertahap dari 100%)
+- Hitung tegangan mengikuti kurva discharge non-linear
+- Tegangan total mengikuti batas konfigurasi (`min_voltage` sampai `max_voltage`)
+- Publish JSON ke MQTT: `seano/{vehicle_id}/battery`
+
+**Format JSON yang dikirim:**
+
+```json
+{
+  "battery_id": 1,
+  "percentage": 99.6,
+  "voltage": 14.58,
+  "current": 3.66,
+  "temperature": 33.9,
+  "status": "discharging",
+  "cell_voltages": [3.655, 3.651, 3.647, 3.627],
+  "cell_count": 4
+}
+```
+
+**Parameter utama (`failsafe.battery.*`):**
+- `use_internal_dummy` (default: false)
+- `check_interval` (default: 1.0)
+- `discharge_rate_pct_per_min` (default: 0.35)
+- `max_voltage` (default: 14.6)
+- `min_voltage` (default: 11.2)
+- `min_current` / `max_current` (default: 2.0 / 5.8)
+- `cell_count` (default: 6)
 
 **Workflow:**
 1. Deteksi kondisi critical (battery ATAU communication)
@@ -162,6 +199,45 @@ failsafe:
     notification_delay: 2.0         # Delay before mode change
 ```
 
+## Mode Menjalankan (Fleksibel)
+
+### 1) Jalan bareng semua package
+
+Node failsafe otomatis ikut jalan saat:
+
+```bash
+ros2 launch seano_startup system.launch.py
+```
+
+Aktifkan mode dummy internal di `system.yaml`:
+
+```yaml
+failsafe:
+  battery:
+    use_internal_dummy: true
+```
+
+Atau override saat launch:
+
+```bash
+./start_seano.sh failsafe.battery.use_internal_dummy:=true
+```
+
+### 2) Jalan satu-satu (untuk debug)
+
+```bash
+ros2 run seano_failsafe seano_battery --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+ros2 run seano_failsafe seano_communication_monitor --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+ros2 run seano_failsafe seano_failsafe --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+### Cek cepat
+
+```bash
+ros2 node list | grep -E 'battery|communication_monitor|failsafe'
+ros2 topic echo /usv/seano/failsafe/status
+```
+
 ## Monitor Topics
 
 ```bash
@@ -225,6 +301,31 @@ Perilaku sistem:
 1. `seano_battery` menerima data simulasi dan publish ke topic battery ROS.
 2. Jika voltage <= `failsafe.battery.critical_voltage_threshold`, topic `/seano/battery/low_alert` menjadi `true`.
 3. `seano_failsafe` mendeteksi kondisi critical, menunggu `failsafe.system.notification_delay`, lalu set mode MAVROS ke `failsafe.system.failsafe_mode` (default: RTL).
+
+## Pipeline Dummy Battery (Tanpa Hardware)
+
+Skenario ini untuk test end-to-end tanpa ESP32 battery monitor:
+
+1. Pastikan mode dummy internal aktif (`failsafe.battery.use_internal_dummy: true`).
+2. Jalankan node battery ROS:
+
+```bash
+ros2 run seano_failsafe seano_battery --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+3. Verifikasi MQTT stream battery:
+
+```bash
+mosquitto_sub -h mqtt.seano.cloud -p 8883 -u seanomqtt -P 'Seano2025*' --insecure -t 'seano/USV-001/battery'
+```
+
+4. Verifikasi ROS pipeline failsafe tetap menerima data:
+
+```bash
+ros2 topic echo /seano/battery/voltage
+ros2 topic echo /seano/battery/percentage
+ros2 topic echo /seano/battery/low_alert
+```
 
 ### Langkah-Langkah Uji Simulation Battery Failsafe
 

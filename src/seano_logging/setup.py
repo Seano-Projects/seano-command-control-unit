@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'logger_node = seano_logging.logger_node:main',
             'telemetry_logger_node = seano_logging.telemetry_logger_node:main',
         ],
     },
