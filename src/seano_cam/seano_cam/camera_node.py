@@ -31,16 +31,25 @@ class CameraNode(Node):
         
         # Get parameters
         self.vehicle_id = self.get_parameter('vehicle.id').value
+        # Sanitize vehicle_id for ROS topic names (replace '-' with '_')
+        self.vehicle_id_topic = self.vehicle_id.replace('-', '_')
         self.check_interval = self.get_parameter('camera.check_interval').value
         self.camera_device = self.get_parameter('camera.device').value
         self.enable_display = self.get_parameter('camera.enable_display').value
         self.enable_publish = self.get_parameter('camera.enable_publish').value
         self.fps = self.get_parameter('camera.fps').value
+
+        # Auto-disable display jika tidak ada DISPLAY (headless/SSH/no GUI)
+        if self.enable_display:
+            import os
+            if not os.environ.get('DISPLAY') and not os.environ.get('WAYLAND_DISPLAY'):
+                self.enable_display = False
+                self.get_logger().warn('No display detected (headless). Disabling camera display.')
         
         # Publisher untuk status kamera
         self.camera_status_pub = self.create_publisher(
             String, 
-            f'/seano/{self.vehicle_id}/camera/status', 
+            f'/seano/{self.vehicle_id_topic}/camera/status', 
             10
         )
         
@@ -48,7 +57,7 @@ class CameraNode(Node):
         if self.enable_publish:
             self.image_pub = self.create_publisher(
                 Image,
-                f'/seano/{self.vehicle_id}/camera/image',
+                f'/seano/{self.vehicle_id_topic}/camera/image',
                 10
             )
             self.bridge = CvBridge()
@@ -212,8 +221,9 @@ class CameraNode(Node):
                 return
             
             # Set resolution (optional)
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 240)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 180)
+            self.cap.set(cv2.CAP_PROP_FPS, self.fps)
             
             # Get actual resolution
             width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -245,10 +255,6 @@ class CameraNode(Node):
             
             # Add info text to frame
             height, width = frame.shape[:2]
-            cv2.putText(frame, f'SEANO CAM - {self.vehicle_id}', 
-                       (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-            cv2.putText(frame, f'{width}x{height} @ {self.fps}fps', 
-                       (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             
             # Display frame (only if GUI is available)
             if self.enable_display:

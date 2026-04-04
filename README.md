@@ -5,11 +5,34 @@ Workspace untuk sistem USV (Unmanned Surface Vehicle) berbasis ROS 2 Humble.
 ## Struktur Paket
 
 - **seano_command** - Command handling untuk kontrol USV
+- **seano_anti_theft** - Monitoring anti-theft berbasis MAVLink + alert keamanan
+- **seano_vision** - Collision avoidance vision stack (kamera, YOLO, risk, bridge)
 - **seano_logging** - Logging telemetry data
 - **seano_mqtt_bridge** - Bridge antara ROS 2 dan MQTT
 - **seano_oceanography** - Node sensor oceanography (CTD, ADCP, SBES)
 - **seano_startup** - Launch files untuk startup sistem
 - **seano_telemetry** - Telemetry data processing
+
+## Guide Per Package
+
+Setiap package sekarang punya section **Mode Menjalankan (Fleksibel)** di README masing-masing:
+
+- `src/seano_anti_theft/README.md`
+- `src/seano_cam/README.md`
+- `src/seano_command/README.md`
+- `src/seano_communication/README.md`
+- `src/seano_failsafe/README.md`
+- `src/seano_logging/README.md`
+- `src/seano_mqtt_bridge/README.md`
+- `src/seano_oceanography/README.md`
+- `src/seano_startup/README.md`
+- `src/seano_telemetry/README.md`
+- `src/seano_vision/README.md`
+
+Isi section tersebut memuat:
+- Cara jalankan bareng (via `seano_startup`)
+- Cara jalankan satu-satu (per node/package)
+- Cek cepat verifikasi node/topic
 
 ## Build Workspace
 
@@ -55,6 +78,12 @@ ros2 run seano_logging telemetry_logger_node
 
 # MQTT bridge
 ros2 run seano_mqtt_bridge mqtt_bridge_node
+
+# Anti-theft node
+ros2 run seano_anti_theft anti_theft_node --ros-args --params-file src/seano_startup/config/system.yaml
+
+# Collision avoidance stack (manual/auto command + MAVROS bridge)
+ros2 launch seano_vision run_auto_stack.launch.py
 
 # CTD oceanography sensor
 ros2 run seano_oceanography ctd_sensor_node --ros-args --params-file src/seano_startup/config/system.yaml

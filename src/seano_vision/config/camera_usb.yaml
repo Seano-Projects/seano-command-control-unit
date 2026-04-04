@@ -1,0 +1,46 @@
+camera_hp:
+  ros__parameters:
+    # ========= INPUT SOURCE =========
+    source: "device"
+    backend: "opencv"
+
+    # Pakai device yang sudah terbukti stabil di WSL
+    device_index: 0
+    device_path: "/dev/video0"
+
+    # Kunci format ringan untuk WSL
+    device_fourcc: "MJPG"
+    device_width: 640
+    device_height: 480
+    device_fps: 30
+
+    # ========= PUBLISHING =========
+    # Matikan publish dari reader thread supaya shutdown aman
+    publish_in_reader: false
+
+    # Target publish ROS
+    max_fps: 15.0
+    max_age_ms: 120
+    grab_skip: 0
+
+    # ========= OUTPUT IMAGE =========
+    output_encoding: "bgr8"
+    # Untuk uji FPS, matikan swap (swap itu kerja ekstra). Nanti kalau butuh warna benar, baru dinyalakan.
+    swap_rb: false
+
+    # ========= TOPICS + QoS =========
+    # Kunci 1 topic dulu agar FPS tidak “kebagi”
+    publish_best_effort: true
+    publish_reliable: false
+    topic_best_effort: "/camera/image_raw"
+    topic_reliable: "/camera/image_raw_reliable"
+    frame_id: "camera"
+
+    # ========= RECONNECT / LOG =========
+    reconnect_sec: 0.5
+    log_stats_sec: 2.0
+
+    # ========= LEGACY =========
+    gstreamer_latency_ms: 80
+    rtsp_tcp: true
+    prefer_h264_pipeline: false

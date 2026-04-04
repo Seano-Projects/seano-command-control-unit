@@ -34,7 +34,9 @@ class RTMPStreamer(Node):
         
         # Get parameters
         self.vehicle_id = self.get_parameter('vehicle.id').value
-        self.rtmp_url = self.get_parameter('rtmp.url').value
+        # Support {vehicle_id} placeholder di URL, convert ke lowercase
+        rtmp_url_raw = self.get_parameter('rtmp.url').value
+        self.rtmp_url = rtmp_url_raw.replace('{vehicle_id}', self.vehicle_id.lower())
         self.fps = self.get_parameter('rtmp.fps').value
         self.width = self.get_parameter('rtmp.width').value
         self.height = self.get_parameter('rtmp.height').value
@@ -44,7 +46,7 @@ class RTMPStreamer(Node):
         
         camera_topic = self.get_parameter('camera.topic').value
         if not camera_topic:
-            camera_topic = f'/seano/{self.vehicle_id}/camera/image'
+            camera_topic = '/camera/image_annotated'
         self.camera_topic = camera_topic
         
         self.bridge = CvBridge()
@@ -83,7 +85,6 @@ class RTMPStreamer(Node):
             # FFmpeg command for RTMP streaming (low latency optimized)
             command = [
                 'ffmpeg',
-                '-re',  # Read input at native frame rate
                 '-f', 'rawvideo',
                 '-vcodec', 'rawvideo',
                 '-pix_fmt', 'bgr24',
@@ -96,8 +97,8 @@ class RTMPStreamer(Node):
                 '-tune', 'zerolatency',
                 '-b:v', self.bitrate,
                 '-maxrate', self.bitrate,
-                '-bufsize', self.bitrate,  # Small buffer = low latency
-                '-g', '15',  # Keyframe every 0.5 sec for responsive playback
+                '-bufsize', '500k',
+                '-g', str(self.fps),
                 '-sc_threshold', '0',
                 '-x264opts', 'no-scenecut',
                 '-f', 'flv',
@@ -166,10 +167,8 @@ class RTMPStreamer(Node):
             # Write frame to ffmpeg stdin
             try:
                 self.ffmpeg_process.stdin.write(frame.tobytes())
-                self.ffmpeg_process.stdin.flush()  # Flush buffer immediately
                 self.frame_count += 1
                 
-                # Log progress every 500 frames (less frequent to reduce lag)
                 if self.frame_count % 500 == 0:
                     self.get_logger().info(f'Streamed {self.frame_count} frames', throttle_duration_sec=5.0)
                     

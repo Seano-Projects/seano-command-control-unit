@@ -3,3 +3,5 @@ log
 build
 install
 doc
+__pycache__
+*.pyc
