@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Launch file: seano_vision (camera + YOLO detector) + rtmp_streamer
-- Kamera dari seano_vision camera_node (camera_hp)
-- Deteksi YOLO dari seano_vision detector_node
-- Stream RTMP dari seano_cam rtmp_streamer
+Launch file: camera + YOLO detector + rtmp_streamer (semua dalam seano_vision)
+- Kamera: seano_vision/camera_node (camera_hp)
+- Deteksi YOLO: seano_vision/detector_node
+- Stream RTMP: seano_vision/rtmp_streamer
 - Output stream: /camera/image_annotated (frame + bounding box)
 """
 
@@ -72,7 +72,7 @@ def launch_nodes(context, *args, **kwargs):
             'sub_reliability': 'best_effort',
             'pub_det': '/camera/detections',
             'pub_det_reliability': 'best_effort',
-            'publish_annotated': True,        # aktifkan frame + bounding box
+            'publish_annotated': True,
             'pub_annotated': '/camera/image_annotated',
             'publish_detections': True,
             'publish_empty_detections': True,
@@ -91,7 +91,7 @@ def launch_nodes(context, *args, **kwargs):
     )
 
     rtmp_streamer = Node(
-        package='seano_cam',
+        package='seano_vision',
         executable='rtmp_streamer',
         name='rtmp_streamer',
         output='screen',
