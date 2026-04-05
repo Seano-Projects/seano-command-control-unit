@@ -3,8 +3,9 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import String, Float64
 from mavros_msgs.msg import State, VfrHud, RadioStatus
-from sensor_msgs.msg import NavSatFix, Imu, Temperature, BatteryState
+from sensor_msgs.msg import NavSatFix, Imu, BatteryState
 import json
+import glob
 
 
 class TelemetryNode(Node):
@@ -36,7 +37,6 @@ class TelemetryNode(Node):
         self.speed = 0.0
         self.rssi = 0
         self.gps_ok = False
-        self.temperature_system = 0.0
         self.system_status = "UNKNOWN"
 
         # QoS Profile for MAVROS topics (BEST_EFFORT to match MAVROS)
@@ -92,14 +92,6 @@ class TelemetryNode(Node):
             10
         )
 
-        # Subscribe to temperature (if available)
-        self.temp_sub = self.create_subscription(
-            Temperature,
-            '/mavros/temperature',
-            self.temperature_callback,
-            10
-        )
-
         # Publisher for telemetry (JSON format)
         self.publisher_ = self.create_publisher(
             String,
@@ -148,9 +140,19 @@ class TelemetryNode(Node):
         """Callback for radio status (RSSI)"""
         self.rssi = msg.rssi
 
-    def temperature_callback(self, msg):
-        """Callback for temperature"""
-        self.temperature_system = msg.temperature
+    def _read_jetson_temperature(self):
+        """Read CPU temperature from Jetson thermal zone"""
+        try:
+            paths = glob.glob('/sys/class/thermal/thermal_zone*/temp')
+            temps = []
+            for path in paths:
+                with open(path, 'r') as f:
+                    temps.append(int(f.read().strip()))
+            if temps:
+                return max(temps) / 1000.0  # milicelsius -> celsius
+        except Exception:
+            pass
+        return 0.0
 
     def imu_callback(self, msg):
         """Callback for IMU data"""
@@ -215,7 +217,7 @@ class TelemetryNode(Node):
             "roll": round(self.roll, 1),
             "pitch": round(self.pitch, 1),
             "yaw": round(self.yaw, 1),
-            "temperature_system": f"{round(self.temperature_system, 1)}"
+            "temperature_system": f"{round(self._read_jetson_temperature(), 1)}"
         }
         
         msg = String()
