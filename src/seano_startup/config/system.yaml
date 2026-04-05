@@ -121,7 +121,6 @@
 
     anti_theft:
       loop_rate_hz: 1.0
-      telemetry_topic: anti_theft/telemetry_json
       alert_topic: anti_theft/alert
       target_speed_mps: 1.0
       mavros:
