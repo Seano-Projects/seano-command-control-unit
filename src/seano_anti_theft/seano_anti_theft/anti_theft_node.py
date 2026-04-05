@@ -23,7 +23,6 @@ class AntiTheftNode(Node):
 
         self.declare_parameter('vehicle.id', 'USV-001')
         self.declare_parameter('anti_theft.loop_rate_hz', 1.0)
-        self.declare_parameter('anti_theft.telemetry_topic', 'anti_theft/telemetry_json')
         self.declare_parameter('anti_theft.alert_topic', 'anti_theft/alert')
         self.declare_parameter('anti_theft.target_speed_mps', 1.0)
 
@@ -51,9 +50,7 @@ class AntiTheftNode(Node):
         self.declare_parameter('anti_theft.rc_failsafe_pwm', 975)
         self.declare_parameter('anti_theft.mission_speed_margin', 1.5)
 
-        telemetry_topic = str(self.get_parameter('anti_theft.telemetry_topic').value)
         alert_topic = str(self.get_parameter('anti_theft.alert_topic').value)
-        self.telemetry_pub = self.create_publisher(String, telemetry_topic, 10)
         self.alert_pub = self.create_publisher(String, alert_topic, 10)
 
         self.vehicle_id = str(self.get_parameter('vehicle.id').value)
@@ -78,7 +75,7 @@ class AntiTheftNode(Node):
         self.mqtt_keepalive = int(self.get_parameter('mqtt.keepalive').value)
         self.mqtt_use_tls = bool(self.get_parameter('mqtt.use_tls').value)
         self.mqtt_tls_insecure = bool(self.get_parameter('mqtt.tls_insecure').value)
-        self.mqtt_topic = f'{self.mqtt_base_topic}/{self.vehicle_id}/anti_theft/telemetry'
+        self.mqtt_alert_topic = f'{self.mqtt_base_topic}/{self.vehicle_id}/anti_theft/alert'
 
         self.geofence_limit = float(self.get_parameter('anti_theft.geofence_limit').value)
         self.crit_tilt_deg = float(self.get_parameter('anti_theft.crit_tilt_deg').value)
@@ -219,18 +216,15 @@ class AntiTheftNode(Node):
             return False
 
     def _publish_outputs(self, payload, alarm):
-        msg = String()
-        msg.data = json.dumps(payload)
-        self.telemetry_pub.publish(msg)
-
         if alarm:
             alert_msg = String()
             alert_msg.data = alarm
             self.alert_pub.publish(alert_msg)
 
-        if self.mqtt_client is not None:
+        if alarm and self.mqtt_client is not None:
             try:
-                self.mqtt_client.publish(self.mqtt_topic, json.dumps(payload), qos=self.mqtt_qos)
+                alert_payload = json.dumps({'vehicle_id': self.vehicle_id, 'alert': alarm})
+                self.mqtt_client.publish(self.mqtt_alert_topic, alert_payload, qos=self.mqtt_qos)
             except Exception as exc:
                 self.get_logger().error(f'MQTT publish failed: {exc}')
 
