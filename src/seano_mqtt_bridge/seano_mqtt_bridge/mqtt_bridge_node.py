@@ -28,8 +28,7 @@ class MqttBridgeNode(Node):
         self.qos = int(self.get_parameter('mqtt.qos').value)
 
         self.mqtt_topic = f"{self.base_topic}/{self.vehicle_id}/telemetry"
-    self.failsafe_mqtt_topic = f"{self.base_topic}/{self.vehicle_id}/failsafe"
-
+        self.failsafe_mqtt_topic = f"{self.base_topic}/{self.vehicle_id}/failsafe"
 
         self.client = mqtt.Client()
 
@@ -54,12 +53,12 @@ class MqttBridgeNode(Node):
             self.telemetry_callback,
             10
         )
-            self.create_subscription(
-                String,
-                '/seano/mqtt/failsafe_notification',
-                self.failsafe_callback,
-                10
-            )
+        self.create_subscription(
+            String,
+            'failsafe/alert',
+            self.failsafe_callback,
+            10
+        )
 
     def telemetry_callback(self, msg):
         self.client.publish(
@@ -68,13 +67,13 @@ class MqttBridgeNode(Node):
             qos=self.qos
         )
 
-        def failsafe_callback(self, msg):
-            self.client.publish(
-                self.failsafe_mqtt_topic,
-                msg.data,
-                qos=1,   # QoS 1 supaya notifikasi darurat tidak hilang
-                retain=False
-            )
+    def failsafe_callback(self, msg):
+        self.client.publish(
+            self.failsafe_mqtt_topic,
+            msg.data,
+            qos=1,
+            retain=False
+        )
 
 
 def main():
