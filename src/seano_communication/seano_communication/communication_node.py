@@ -145,9 +145,9 @@ class CommunicationNode(Node):
             os.system(f'sudo ip route replace default dev {interface}')
             
             # Publish status
-            msg = String()
-            msg.data = f'SWITCHED_TO:{interface}'
-            self.status_publisher.publish(msg)
+            status_msg = String()
+            status_msg.data = f'SWITCHED_TO:{interface}'
+            self.status_publisher.publish(status_msg)
             
         except Exception as e:
             self.get_logger().error(f'Failed to switch route: {e}')
