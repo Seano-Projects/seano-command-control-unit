@@ -3,7 +3,6 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool, String, Float32
-from geometry_msgs.msg import Twist
 from mavros_msgs.msg import State
 from mavros_msgs.srv import SetMode, CommandLong
 import json
@@ -14,7 +13,7 @@ class SeanoFailsafeNode(Node):
     def __init__(self):
         super().__init__('seano_failsafe')
         
-        # Subscribers - Battery
+        # Subscribers - Battery (dari seano_battery node)
         self.battery_low_sub = self.create_subscription(
             Bool,
             '/seano/battery/low_alert',
@@ -28,7 +27,7 @@ class SeanoFailsafeNode(Node):
             10
         )
         
-        # Subscribers - Communication
+        # Subscribers - Communication (dari seano_communication_monitor node)
         self.comm_failure_sub = self.create_subscription(
             Bool,
             '/seano/communication/failure_alert',
@@ -54,7 +53,7 @@ class SeanoFailsafeNode(Node):
         self.failsafe_status_pub = self.create_publisher(String, '/seano/failsafe/status', 10)
         self.emergency_stop_pub = self.create_publisher(Bool, '/seano/failsafe/emergency_stop', 10)
         self.failsafe_event_pub = self.create_publisher(String, '/seano/failsafe/event', 10)
-        self.mqtt_notify_pub = self.create_publisher(String, '/seano/mqtt/failsafe_notification', 10)
+        self.mqtt_notify_pub = self.create_publisher(String, 'failsafe/alert', 10)
         
         # Service clients for Mavros
         self.set_mode_client = self.create_client(SetMode, '/mavros/set_mode')
@@ -108,10 +107,9 @@ class SeanoFailsafeNode(Node):
         self.current_voltage = msg.data
     
     def battery_callback(self, msg):
-        """Handle battery low alert"""
+        """Handle battery low alert dari seano_battery node"""
         if not self.battery_failsafe_enabled:
             return
-        
         self.battery_critical = msg.data
     
     def comm_status_callback(self, msg):
@@ -119,10 +117,9 @@ class SeanoFailsafeNode(Node):
         self.comm_status = msg.data
     
     def communication_callback(self, msg):
-        """Handle communication failure alert"""
+        """Handle communication failure alert dari seano_communication_monitor node"""
         if not self.comm_failsafe_enabled:
             return
-        
         self.comm_critical = msg.data
     
     def mavros_state_callback(self, msg):
