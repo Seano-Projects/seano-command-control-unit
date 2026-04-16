@@ -1,5 +1,7 @@
+import csv
 import json
 import math
+import os
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -10,6 +12,50 @@ from rclpy.qos import HistoryPolicy, QoSProfile, ReliabilityPolicy
 from sensor_msgs.msg import NavSatFix
 import ssl
 from std_msgs.msg import String
+
+
+class _DailyCsvWriter:
+    def __init__(self, log_dir: str, prefix: str, fieldnames: list):
+        self._log_dir = log_dir
+        self._prefix = prefix
+        self._fieldnames = fieldnames
+        self._date = None
+        self._fh = None
+        self._writer = None
+        os.makedirs(log_dir, exist_ok=True)
+
+    def _rotate(self):
+        today = datetime.now().strftime('%Y%m%d')
+        if today == self._date:
+            return
+        if self._fh:
+            self._fh.close()
+        self._date = today
+        path = os.path.join(self._log_dir, f'{self._prefix}_{today}.csv')
+        first = not os.path.exists(path)
+        self._fh = open(path, 'a', newline='', encoding='utf-8')
+        self._writer = csv.DictWriter(self._fh, fieldnames=self._fieldnames, extrasaction='ignore')
+        if first:
+            self._writer.writeheader()
+
+    def write(self, row: dict):
+        self._rotate()
+        self._writer.writerow(row)
+        self._fh.flush()
+
+    def close(self):
+        if self._fh:
+            self._fh.close()
+            self._fh = None
+
+
+_CTD_FIELDS = [
+    'date_time', 'vehicle_code', 'sensor_code', 'sensor',
+    'latitude', 'longitude', 'altitude', 'gps_ok',
+    'depth_m', 'pressure_m', 'temperature_c', 'conductivity_ms_cm',
+    'salinity_psu', 'density_kg_m3', 'sound_velocity_ms',
+    'mqtt_publish_timestamp',
+]
 
 
 class CTDSensorNode(Node):
@@ -55,6 +101,15 @@ class CTDSensorNode(Node):
         self.qos = int(self.get_parameter('mqtt.qos').value)
         self.mqtt_topic = f'{self.base_topic}/{self.vehicle_code}/{self.sensor_code}/data'
         self.sample_index = 0
+
+        # CSV Logger
+        self.declare_parameter('logger.log_dir', '~/Seano_ws/ros_log')
+        _log_dir = os.path.expanduser(self.get_parameter('logger.log_dir').value)
+        self._ctd_csv = _DailyCsvWriter(
+            os.path.join(_log_dir, 'oceanography'),
+            'ctd_log',
+            _CTD_FIELDS,
+        )
 
         sensor_qos = QoSProfile(
             reliability=ReliabilityPolicy.BEST_EFFORT,
@@ -206,11 +261,16 @@ class CTDSensorNode(Node):
         self.publisher_.publish(msg)
 
         if self.mqtt_client is not None:
+            mqtt_publish_ts = datetime.now(self.local_tz).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
             self.mqtt_client.publish(self.mqtt_topic, msg.data, qos=self.qos)
+            row = dict(payload)
+            row['mqtt_publish_timestamp'] = mqtt_publish_ts
+            self._ctd_csv.write(row)
 
         self.sample_index += 1
 
     def destroy_node(self):
+        self._ctd_csv.close()
         if self.mqtt_client is not None:
             self.mqtt_client.loop_stop()
             self.mqtt_client.disconnect()

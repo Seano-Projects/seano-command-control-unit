@@ -1,10 +1,10 @@
 # seano_mission
 
-Package ini memonitor status misi (mission) USV melalui MAVROS: waypoint yang sedang aktif, waypoint yang sudah dicapai, home position, dan status koneksi.
+Package ini memonitor status misi (mission) USV melalui MAVROS: waypoint yang sedang aktif, waypoint yang sudah dicapai, home position, dan status koneksi. Paket ini juga menerima upload waypoint dari MQTT lalu meneruskannya ke MAVROS mission push.
 
 ## Node
 
-- `mission_node`: subscribe topic MAVROS terkait mission, publish status misi ke ROS2 topic.
+- `mission_node`: subscribe topic MAVROS terkait mission, menerima upload waypoint via MQTT, lalu publish status misi dan ACK upload.
 
 ## ROS2 Interface
 
@@ -21,8 +21,9 @@ Package ini memonitor status misi (mission) USV melalui MAVROS: waypoint yang se
 
 | Topic | Tipe | Keterangan |
 |---|---|---|
-| `/seano/mission/status` | `std_msgs/String` (JSON) | Status misi lengkap, publish tiap 2 detik |
-| `/seano/mission/waypoint_reached` | `std_msgs/String` (JSON) | Event saat waypoint dicapai |
+| `mission/status` (→ `/usv/mission/status`) | `std_msgs/String` (JSON) | Status misi lengkap, publish tiap 2 detik |
+| `mission/waypoint_reached` (→ `/usv/mission/waypoint_reached`) | `std_msgs/String` (JSON) | Event saat waypoint dicapai |
+| `waypoint_status` (→ `/usv/waypoint_status`) | `std_msgs/String` (JSON) | ACK hasil upload waypoint |
 
 ### Contoh Payload `/seano/mission/status`
 
@@ -64,7 +65,43 @@ Package ini memonitor status misi (mission) USV melalui MAVROS: waypoint yang se
 
 ## MQTT
 
-Tidak ada koneksi MQTT langsung. Data bisa diforward oleh `seano_mqtt_bridge` dari topic `/seano/mission/status`.
+### Subscribe
+
+| MQTT Topic | Format | Keterangan |
+|---|---|---|
+| `seano/{vehicle_code}/waypoint` | JSON | Upload mission waypoint |
+
+### Publish
+
+| MQTT Topic | Format | Keterangan |
+|---|---|---|
+| `seano/{vehicle_code}/waypoint/status` | JSON | ACK hasil upload waypoint |
+
+### Payload input
+
+```json
+{
+  "set_home_from_first_waypoint": true,
+  "waypoints": [
+    { "lat": -6.8928, "lon": 107.5664, "alt": 0 }
+  ]
+}
+```
+
+Field waypoint yang dikenali: `frame`, `command`, `param1`, `param2`, `param3`, `param4`, `autocontinue`.
+
+### ACK output
+
+```json
+{
+  "vehicle_code": "USV-001",
+  "status": "SUCCESS",
+  "message": "Waypoint upload completed",
+  "command": "WAYPOINT_UPLOAD"
+}
+```
+
+Untuk kegagalan, `status` bernilai `FAILED` dan `message` berisi alasan ringkas.
 
 ## Cara Build dan Jalankan
 
@@ -80,8 +117,8 @@ ros2 run seano_mission mission_node --ros-args --params-file ~/Seano_ws/src/sean
 
 ```bash
 # Cek topic mission status
-ros2 topic echo /seano/mission/status
+ros2 topic echo /usv/mission/status
 
 # Cek event waypoint reached
-ros2 topic echo /seano/mission/waypoint_reached
+ros2 topic echo /usv/mission/waypoint_reached
 ```

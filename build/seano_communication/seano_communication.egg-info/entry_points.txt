@@ -1,3 +1,2 @@
 [console_scripts]
 communication_node = seano_communication.communication_node:main
-

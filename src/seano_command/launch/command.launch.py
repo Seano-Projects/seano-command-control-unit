@@ -35,6 +35,13 @@ def _launch_setup(context, *args, **kwargs):
             parameters=[params_file],
             output='screen'
         ),
+        Node(
+            package='seano_command',
+            executable='param_node',
+            name='param',
+            parameters=[params_file],
+            output='screen'
+        ),
     ]
 
 

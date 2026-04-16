@@ -8,6 +8,17 @@ setup.py
 ../../build/seano_command/seano_command.egg-info/requires.txt
 ../../build/seano_command/seano_command.egg-info/top_level.txt
 ../../build/seano_command/seano_command.egg-info/zip-safe
+launch/command.launch.py
 resource/seano_command
 seano_command/__init__.py
 seano_command/command_node.py
+seano_command/param_node.py
+seano_command/thruster_node.py
+seano_command/waypoint_node.py
+seano_command.egg-info/PKG-INFO
+seano_command.egg-info/SOURCES.txt
+seano_command.egg-info/dependency_links.txt
+seano_command.egg-info/entry_points.txt
+seano_command.egg-info/requires.txt
+seano_command.egg-info/top_level.txt
+seano_command.egg-info/zip-safe

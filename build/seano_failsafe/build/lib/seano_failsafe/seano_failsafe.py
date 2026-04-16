@@ -2,8 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import Bool, String, Float32
-from geometry_msgs.msg import Twist
 from mavros_msgs.msg import State
 from mavros_msgs.srv import SetMode, CommandLong
 import json
@@ -13,8 +13,14 @@ import time
 class SeanoFailsafeNode(Node):
     def __init__(self):
         super().__init__('seano_failsafe')
-        
-        # Subscribers - Battery
+
+        sensor_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+
+        # Subscribers - Battery (dari seano_battery node)
         self.battery_low_sub = self.create_subscription(
             Bool,
             '/seano/battery/low_alert',
@@ -28,7 +34,7 @@ class SeanoFailsafeNode(Node):
             10
         )
         
-        # Subscribers - Communication
+        # Subscribers - Communication (dari seano_communication_monitor node)
         self.comm_failure_sub = self.create_subscription(
             Bool,
             '/seano/communication/failure_alert',
@@ -47,14 +53,14 @@ class SeanoFailsafeNode(Node):
             State,
             '/mavros/state',
             self.mavros_state_callback,
-            10
+            sensor_qos
         )
         
         # Publishers
         self.failsafe_status_pub = self.create_publisher(String, '/seano/failsafe/status', 10)
         self.emergency_stop_pub = self.create_publisher(Bool, '/seano/failsafe/emergency_stop', 10)
         self.failsafe_event_pub = self.create_publisher(String, '/seano/failsafe/event', 10)
-        self.mqtt_notify_pub = self.create_publisher(String, '/seano/mqtt/failsafe_notification', 10)
+        self.mqtt_notify_pub = self.create_publisher(String, 'failsafe/alert', 10)
         
         # Service clients for Mavros
         self.set_mode_client = self.create_client(SetMode, '/mavros/set_mode')
@@ -66,19 +72,23 @@ class SeanoFailsafeNode(Node):
         self.declare_parameter('failsafe.system.failsafe_mode', 'RTL')  # RTL, LOITER, LAND
         self.declare_parameter('failsafe.system.notification_delay', 2.0)  # seconds before action
         self.declare_parameter('failsafe.system.recovery_delay', 10.0)  # seconds to wait for recovery
+        self.declare_parameter('failsafe.system.mode_enforce_interval', 2.0)  # seconds
         
         self.battery_failsafe_enabled = self.get_parameter('failsafe.system.battery_failsafe_enabled').value
         self.comm_failsafe_enabled = self.get_parameter('failsafe.system.communication_failsafe_enabled').value
         self.failsafe_mode = self.get_parameter('failsafe.system.failsafe_mode').value
         self.notification_delay = self.get_parameter('failsafe.system.notification_delay').value
         self.recovery_delay = self.get_parameter('failsafe.system.recovery_delay').value
+        self.mode_enforce_interval = self.get_parameter('failsafe.system.mode_enforce_interval').value
         
         # State variables
         self.battery_critical = False
         self.comm_critical = False
         self.failsafe_active = False
         self.failsafe_triggered_time = None
+        self.recovery_started_time = None
         self.mode_changed = False
+        self.last_mode_enforce_time = 0.0
         
         self.current_voltage = 0.0
         self.comm_status = 'unknown'
@@ -104,10 +114,9 @@ class SeanoFailsafeNode(Node):
         self.current_voltage = msg.data
     
     def battery_callback(self, msg):
-        """Handle battery low alert"""
+        """Handle battery low alert dari seano_battery node"""
         if not self.battery_failsafe_enabled:
             return
-        
         self.battery_critical = msg.data
     
     def comm_status_callback(self, msg):
@@ -115,10 +124,9 @@ class SeanoFailsafeNode(Node):
         self.comm_status = msg.data
     
     def communication_callback(self, msg):
-        """Handle communication failure alert"""
+        """Handle communication failure alert dari seano_communication_monitor node"""
         if not self.comm_failsafe_enabled:
             return
-        
         self.comm_critical = msg.data
     
     def mavros_state_callback(self, msg):
@@ -131,6 +139,7 @@ class SeanoFailsafeNode(Node):
         failsafe_needed = self.battery_critical or self.comm_critical
         
         if failsafe_needed and not self.failsafe_active:
+            self.recovery_started_time = None
             # Start failsafe procedure
             if self.failsafe_triggered_time is None:
                 self.failsafe_triggered_time = time.time()
@@ -143,15 +152,21 @@ class SeanoFailsafeNode(Node):
             elapsed = time.time() - self.failsafe_triggered_time
             if elapsed >= self.notification_delay:
                 self.activate_failsafe()
+
+        elif failsafe_needed and self.failsafe_active:
+            # While condition is still critical, keep failsafe mode enforced.
+            self.recovery_started_time = None
+            self.enforce_failsafe_mode()
         
         elif not failsafe_needed and self.failsafe_active:
             # Check if conditions have been good for recovery_delay
-            if self.failsafe_triggered_time is not None:
-                elapsed_recovery = time.time() - self.failsafe_triggered_time
+            if self.recovery_started_time is None:
+                self.recovery_started_time = time.time()
+                self.get_logger().info('Failsafe condition cleared, waiting recovery delay...')
+            else:
+                elapsed_recovery = time.time() - self.recovery_started_time
                 if elapsed_recovery >= self.recovery_delay:
                     self.deactivate_failsafe()
-            else:
-                self.deactivate_failsafe()
         
         elif not failsafe_needed and self.failsafe_triggered_time is not None:
             # Condition cleared before triggering
@@ -167,6 +182,7 @@ class SeanoFailsafeNode(Node):
             return
         
         self.failsafe_active = True
+        self.last_mode_enforce_time = 0.0
         self.get_logger().error('=' * 60)
         self.get_logger().error('FAILSAFE ACTIVATED!')
         self.get_logger().error('=' * 60)
@@ -187,8 +203,8 @@ class SeanoFailsafeNode(Node):
         # Wait a moment for notification to be sent
         time.sleep(0.5)
         
-        # Change flight mode
-        self.change_flight_mode(self.failsafe_mode)
+        # Change flight mode immediately, then keep enforcing while active.
+        self.enforce_failsafe_mode(force=True)
         
         # Publish emergency stop
         emergency_msg = Bool()
@@ -213,6 +229,7 @@ class SeanoFailsafeNode(Node):
         
         self.failsafe_active = False
         self.failsafe_triggered_time = None
+        self.recovery_started_time = None
         self.mode_changed = False
         
         self.get_logger().info('Failsafe deactivated - conditions recovered')
@@ -273,8 +290,8 @@ class SeanoFailsafeNode(Node):
             self.get_logger().error('Cannot change mode - Mavros not connected!')
             return False
         
-        if self.mode_changed:
-            self.get_logger().warn(f'Mode already changed to {self.failsafe_mode}')
+        if str(self.current_mavros_mode).upper() == str(mode).upper():
+            self.mode_changed = True
             return True
         
         self.get_logger().warn(f'Changing flight mode to {mode}...')
@@ -301,6 +318,22 @@ class SeanoFailsafeNode(Node):
         except Exception as e:
             self.get_logger().error(f'Error changing flight mode: {str(e)}')
             return False
+
+    def enforce_failsafe_mode(self, force=False):
+        """Keep FCU in failsafe mode while failsafe condition remains active."""
+        if not self.failsafe_active:
+            return
+
+        if str(self.current_mavros_mode).upper() == str(self.failsafe_mode).upper():
+            self.mode_changed = True
+            return
+
+        now = time.time()
+        if (not force) and ((now - self.last_mode_enforce_time) < self.mode_enforce_interval):
+            return
+
+        self.last_mode_enforce_time = now
+        self.change_flight_mode(self.failsafe_mode)
     
     def publish_status(self):
         """Publish failsafe status"""

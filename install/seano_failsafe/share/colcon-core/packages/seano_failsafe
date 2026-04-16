@@ -1,1 +1,1 @@
-geometry_msgs:mavros_msgs:rclpy:std_msgs
+geometry_msgs:mavros_msgs:python3-paho-mqtt:python3-serial:rclpy:std_msgs

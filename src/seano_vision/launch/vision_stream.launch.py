@@ -78,12 +78,13 @@ def launch_nodes(context, *args, **kwargs):
             'publish_empty_detections': True,
             'model_path': model_path,
             'device': 'cuda',
+            'half': True,
             'imgsz': 320,
             'conf': 0.25,
             'iou': 0.45,
             'class_ids': 'ALL',
             'max_det': 50,
-            'max_fps': 15.0,
+            'max_fps': 10.0,
             'qos_depth': 1,
             'warmup': False,
             'stats_period': 5.0,
@@ -96,7 +97,7 @@ def launch_nodes(context, *args, **kwargs):
         name='rtmp_streamer',
         output='screen',
         parameters=[params_file, {
-            'camera.topic': '/camera/image_annotated',
+            'camera.topic': '/camera/image_raw',
             'rtmp.fps': 15,
         }],
     )

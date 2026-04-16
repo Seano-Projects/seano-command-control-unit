@@ -29,7 +29,7 @@ Package ROS2 yang bertugas sebagai **pusat pengumpul data sensor** dari flight c
 | Publish ke | `telemetry` (String JSON, 1 Hz) |
 | Namespace saat system launch | `/usv/telemetry` |
 | Subscribe dari | 7 topic MAVROS |
-| MQTT langsung | **Tidak** — diteruskan oleh `seano_mqtt_bridge` |
+| MQTT langsung | **Tidak** — diteruskan oleh `seano_startup/mqtt_bridge_node` |
 
 ---
 
@@ -67,9 +67,9 @@ Flight Controller (ArduPilot/ArduRover)
      ┌────────────┼──────────────┐
      │            │              │
      ▼            ▼              ▼
-seano_mqtt   seano_logging  seano_logger
-(→ MQTT      (→ DB log)     (→ CSV log)
- broker)
+seano_startup  seano_logger   (custom)
+(mqtt_bridge   (→ CSV log)    subscriber
+ → MQTT)
 ```
 
 ---
@@ -191,8 +191,7 @@ Jika MAVROS tidak punya data baterai (`percentage = -1`), di-set ke `0.0`.
 
 | Package | Cara Menggunakan Telemetry | Topic |
 |---|---|---|
-| `seano_mqtt_bridge` | Subscribe `telemetry`, forward ke MQTT broker | `telemetry` → `seano/{id}/telemetry` |
-| `seano_logging` | Subscribe `telemetry`, log ke CSV/database | `telemetry` |
+| `seano_startup` | Subscribe `telemetry`, forward ke MQTT broker | `telemetry` → `seano/{id}/telemetry` |
 | `seano_logger` | Subscribe `telemetry`, log ke CSV subfolder `telemetry/` | `telemetry` |
 | `seano_anti_theft` | Tidak subscribe — punya GPS/IMU subscribe sendiri | — |
 

@@ -2,6 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import Bool, String, Float32
 from mavros_msgs.msg import State
 from mavros_msgs.srv import SetMode, CommandLong
@@ -12,7 +13,13 @@ import time
 class SeanoFailsafeNode(Node):
     def __init__(self):
         super().__init__('seano_failsafe')
-        
+
+        sensor_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+
         # Subscribers - Battery (dari seano_battery node)
         self.battery_low_sub = self.create_subscription(
             Bool,
@@ -46,7 +53,7 @@ class SeanoFailsafeNode(Node):
             State,
             '/mavros/state',
             self.mavros_state_callback,
-            10
+            sensor_qos
         )
         
         # Publishers

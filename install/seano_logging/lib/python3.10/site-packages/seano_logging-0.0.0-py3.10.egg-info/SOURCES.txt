@@ -1,3 +1,4 @@
+README.md
 package.xml
 setup.cfg
 setup.py
@@ -10,6 +11,7 @@ setup.py
 ../../build/seano_logging/seano_logging.egg-info/zip-safe
 resource/seano_logging
 seano_logging/__init__.py
+seano_logging/logger_node.py
 seano_logging/telemetry_logger_node.py
 test/test_copyright.py
 test/test_flake8.py

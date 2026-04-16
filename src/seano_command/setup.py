@@ -28,6 +28,7 @@ setup(
             'command_node = seano_command.command_node:main',
             'waypoint_node = seano_command.waypoint_node:main',
             'thruster_node = seano_command.thruster_node:main',
+            'param_node = seano_command.param_node:main',
         ],
     },
 )

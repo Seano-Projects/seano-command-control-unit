@@ -62,6 +62,7 @@
       qos: 1
       base_topic: seano
       keepalive: 60
+      status_keepalive: 5
       heartbeat_interval: 30.0
 
     oceanography:
@@ -76,6 +77,9 @@
         publish_rate_hz: 1.0
         max_depth_m: 120.0
         cycle_seconds: 120.0
+
+    mission:
+      auto_set_home_from_first_waypoint: true
 
     thruster:
       pwm_neutral: 1500
@@ -146,7 +150,7 @@
       detections_topic: /camera/detections
 
     camera:
-      topic: /seano/USV_001/camera/image
+      topic: /seano/camera/image_raw
 
     rtmp:
       enable: true

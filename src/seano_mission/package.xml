@@ -11,6 +11,7 @@
   <depend>std_msgs</depend>
   <depend>mavros_msgs</depend>
   <depend>geographic_msgs</depend>
+  <exec_depend>python3-paho-mqtt</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

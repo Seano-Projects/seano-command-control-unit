@@ -4,3 +4,6 @@ source;share/seano_communication/hook/pythonpath.sh
 source;share/seano_communication/hook/ament_prefix_path.ps1
 source;share/seano_communication/hook/ament_prefix_path.dsv
 source;share/seano_communication/hook/ament_prefix_path.sh
+source;../../build/seano_communication/share/seano_communication/hook/pythonpath_develop.ps1
+source;../../build/seano_communication/share/seano_communication/hook/pythonpath_develop.dsv
+source;../../build/seano_communication/share/seano_communication/hook/pythonpath_develop.sh

@@ -6,6 +6,7 @@ import time
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from sensor_msgs.msg import Imu, NavSatFix
 from mavros_msgs.msg import RCIn, State, VfrHud
 from mavros_msgs.srv import SetMode
@@ -102,11 +103,17 @@ class AntiTheftNode(Node):
 
         self.set_mode_client = self.create_client(SetMode, self.set_mode_service)
 
-        self.create_subscription(NavSatFix, self.gps_topic, self.gps_callback, 10)
-        self.create_subscription(Imu, self.imu_topic, self.imu_callback, 10)
-        self.create_subscription(VfrHud, self.vfr_topic, self.vfr_callback, 10)
-        self.create_subscription(State, self.state_topic, self.state_callback, 10)
-        self.create_subscription(RCIn, self.rc_in_topic, self.rc_in_callback, 10)
+        sensor_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10
+        )
+
+        self.create_subscription(NavSatFix, self.gps_topic, self.gps_callback, sensor_qos)
+        self.create_subscription(Imu, self.imu_topic, self.imu_callback, sensor_qos)
+        self.create_subscription(VfrHud, self.vfr_topic, self.vfr_callback, sensor_qos)
+        self.create_subscription(State, self.state_topic, self.state_callback, sensor_qos)
+        self.create_subscription(RCIn, self.rc_in_topic, self.rc_in_callback, sensor_qos)
 
         if self.mqtt_enabled:
             self._setup_mqtt()
@@ -137,7 +144,7 @@ class AntiTheftNode(Node):
             self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port, self.mqtt_keepalive)
             self.mqtt_client.loop_start()
             self.get_logger().info(
-                f'MQTT connected: {self.mqtt_broker}:{self.mqtt_port} topic={self.mqtt_topic}'
+                f'MQTT connected: {self.mqtt_broker}:{self.mqtt_port} topic={self.mqtt_alert_topic}'
             )
         except Exception as exc:
             self.get_logger().error(f'MQTT connection failed: {exc}')

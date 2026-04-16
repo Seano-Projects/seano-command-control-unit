@@ -1,5 +1,0 @@
-[console_scripts]
-camera_node = seano_cam.camera_node:main
-camera_viewer = seano_cam.camera_viewer:main
-rtmp_streamer = seano_cam.rtmp_streamer:main
-

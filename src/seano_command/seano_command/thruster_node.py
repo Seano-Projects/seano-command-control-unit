@@ -115,14 +115,16 @@ class ThrusterNode(Node):
         self._client.reconnect_delay_set(min_delay=1, max_delay=30)
 
         try:
-            self._client.connect(self._broker, self._port, keepalive=self._keepalive)
             self._client.loop_start()
+            # connect_async keeps node alive when DNS/network is not ready at boot.
+            self._client.connect_async(self._broker, self._port, keepalive=self._keepalive)
             self.get_logger().info(
-                f"Thruster node terhubung ke MQTT {self._broker}:{self._port}"
+                f"Thruster MQTT connect scheduled: {self._broker}:{self._port}"
             )
         except Exception as exc:
-            self.get_logger().error(f"Gagal koneksi MQTT: {exc}")
-            raise SystemExit
+            self.get_logger().error(
+                f"Gagal startup MQTT (node tetap jalan, retry otomatis): {exc}"
+            )
 
         self.get_logger().info(
             f"Thruster node aktif — vehicle: {self._vehicle_id} | "

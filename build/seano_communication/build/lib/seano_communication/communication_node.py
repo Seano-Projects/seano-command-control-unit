@@ -23,7 +23,7 @@ class CommunicationNode(Node):
         self.declare_parameter('communication.wifi_interface', 'wlP1p1s0')
         self.declare_parameter('communication.ethernet_interface', 'enP8p1s0')
         self.declare_parameter('communication.ping_target', '8.8.8.8')
-        self.declare_parameter('communication.speed_test_url', 'http://speedtest.tele2.net/100MB.zip')
+        self.declare_parameter('communication.speed_test_url', 'http://speedtest.tele2.net/1MB.zip')
         self.declare_parameter('communication.latency_threshold', 200.0)
         self.declare_parameter('communication.bandwidth_threshold', 1.0)
         self.declare_parameter('communication.check_interval', 5.0)
@@ -145,9 +145,9 @@ class CommunicationNode(Node):
             os.system(f'sudo ip route replace default dev {interface}')
             
             # Publish status
-            msg = String()
-            msg.data = f'SWITCHED_TO:{interface}'
-            self.status_publisher.publish(msg)
+            status_msg = String()
+            status_msg.data = f'SWITCHED_TO:{interface}'
+            self.status_publisher.publish(status_msg)
             
         except Exception as e:
             self.get_logger().error(f'Failed to switch route: {e}')

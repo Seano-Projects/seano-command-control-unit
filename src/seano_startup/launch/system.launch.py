@@ -29,9 +29,9 @@ def _vision_profile_defaults(system_mode: str) -> dict:
     # Field testing on edge hardware defaults to lighter vision settings.
     if mode == 'field_test':
         return {
-            'enable_vision_stack': 'true',
+            'enable_vision_stack': 'false',
             'enable_vision_actuation': 'false',
-            'enable_rtmp_stream': 'true',
+            'enable_rtmp_stream': 'false',
             'vision_det_imgsz': '320',
             'vision_det_max_fps': '6.0',
             'vision_det_conf': '0.30',
@@ -39,9 +39,9 @@ def _vision_profile_defaults(system_mode: str) -> dict:
         }
 
     return {
-        'enable_vision_stack': 'true',
+        'enable_vision_stack': 'false',
         'enable_vision_actuation': 'false',
-        'enable_rtmp_stream': 'true',
+        'enable_rtmp_stream': 'false',
         'vision_det_imgsz': '416',
         'vision_det_max_fps': '10.0',
         'vision_det_conf': '0.25',
@@ -64,6 +64,8 @@ def generate_launch_description():
     vision_det_max_fps = LaunchConfiguration('vision_det_max_fps')
     vision_det_conf = LaunchConfiguration('vision_det_conf')
     vision_camera_launch = LaunchConfiguration('vision_camera_launch')
+    enable_failsafe = LaunchConfiguration('enable_failsafe')
+    gcs_url = LaunchConfiguration('gcs_url')
 
     vision_full_ca_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -75,6 +77,15 @@ def generate_launch_description():
         condition=IfCondition(enable_vision_stack),
         launch_arguments={
             'camera_launch': vision_camera_launch,
+            'use_camera': 'true',
+            'use_detector': 'false',
+            'use_waterline': 'false',
+            'use_fp_guard': 'false',
+            'use_fusion': 'false',
+            'use_vq': 'false',
+            'use_freeze': 'false',
+            'use_risk': 'false',
+            'use_watchdog': 'false',
             'image_topic': '/seano/camera/image_raw_reliable',
             'annotated_topic': '/camera/image_annotated',
             'detections_raw_topic': '/camera/detections',
@@ -113,7 +124,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'fcu_url': '/dev/ttyACM0:115200',
-            'gcs_url': 'udp://@0.0.0.0:14550',
+            'gcs_url': gcs_url,
         }.items()
     )
 
@@ -128,6 +139,8 @@ def generate_launch_description():
         DeclareLaunchArgument('vision_det_max_fps', default_value=profile_defaults['vision_det_max_fps']),
         DeclareLaunchArgument('vision_det_conf', default_value=profile_defaults['vision_det_conf']),
         DeclareLaunchArgument('vision_camera_launch', default_value=profile_defaults['vision_camera_launch']),
+        DeclareLaunchArgument('enable_failsafe', default_value=os.getenv('SEANO_ENABLE_FAILSAFE', 'false')),
+        DeclareLaunchArgument('gcs_url', default_value=os.getenv('SEANO_GCS_URL', 'udp://@127.0.0.1:14550')),
         suppress_mavros_param_log,
         mavros_launch,
         vision_full_ca_launch,
@@ -135,6 +148,14 @@ def generate_launch_description():
         
         GroupAction([
             PushRosNamespace('usv'),
+
+            Node(
+                package='seano_startup',
+                executable='mqtt_status_node',
+                name='mqtt_status',
+                parameters=[param_file],
+                output='screen'
+            ),
 
             Node(
                 package='seano_telemetry',
@@ -145,34 +166,20 @@ def generate_launch_description():
             ),
 
             Node(
-                package='seano_logging',
-                executable='telemetry_logger_node',
-                name='telemetry_logger',
+                package='seano_mission',
+                executable='mission_node',
+                name='mission',
                 parameters=[param_file],
                 output='screen'
             ),
 
             Node(
-                package='seano_logging',
-                executable='logger_node',
-                name='logger',
-                parameters=[param_file],
-                output='screen'
-            ),
-
-            Node(
-                package='seano_mqtt_bridge',
+                package='seano_startup',
                 executable='mqtt_bridge_node',
                 name='mqtt_bridge',
                 parameters=[param_file],
-                output='screen'
-            ),
-
-            Node(
-                package='seano_mqtt_bridge',
-                executable='mqtt_status_node',
-                name='mqtt_status',
-                parameters=[param_file],
+                respawn=True,
+                respawn_delay=5.0,
                 output='screen'
             ),
 
@@ -186,24 +193,8 @@ def generate_launch_description():
 
             Node(
                 package='seano_command',
-                executable='waypoint_node',
-                name='waypoint',
-                parameters=[param_file],
-                output='screen'
-            ),
-
-            Node(
-                package='seano_command',
                 executable='thruster_node',
                 name='thruster',
-                parameters=[param_file],
-                output='screen'
-            ),
-
-            Node(
-                package='seano_communication',
-                executable='communication_node',
-                name='communication',
                 parameters=[param_file],
                 output='screen'
             ),
@@ -229,6 +220,7 @@ def generate_launch_description():
                 executable='seano_battery',
                 name='battery',
                 parameters=[param_file],
+                condition=IfCondition(enable_failsafe),
                 output='screen'
             ),
 
@@ -237,6 +229,7 @@ def generate_launch_description():
                 executable='seano_communication_monitor',
                 name='communication_monitor',
                 parameters=[param_file],
+                condition=IfCondition(enable_failsafe),
                 output='screen'
             ),
 
@@ -245,11 +238,12 @@ def generate_launch_description():
                 executable='seano_failsafe',
                 name='failsafe',
                 parameters=[param_file],
+                condition=IfCondition(enable_failsafe),
                 output='screen'
             ),
 
             Node(
-                package='seano_cam',
+                package='seano_vision',
                 executable='rtmp_streamer',
                 name='rtmp_streamer',
                 parameters=[param_file],

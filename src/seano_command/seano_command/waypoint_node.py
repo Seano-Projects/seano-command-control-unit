@@ -31,6 +31,10 @@ Status hasil upload dipublish ke:
 import json
 import ssl
 from typing import Any, Dict, List, Optional
+import csv
+import os
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import paho.mqtt.client as mqtt
 import rclpy
@@ -38,6 +42,74 @@ from mavros_msgs.msg import Waypoint
 from mavros_msgs.srv import CommandLong, WaypointPush
 from rclpy.node import Node
 from std_msgs.msg import String
+
+
+_TZ = ZoneInfo('Asia/Jakarta')
+
+
+def _now_iso() -> str:
+    return datetime.now(_TZ).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+
+
+def _duration_ms(start_iso: str, end_iso: str) -> int:
+    try:
+        fmt = '%Y-%m-%dT%H:%M:%S.%f'
+        t0 = datetime.strptime(start_iso.rstrip('Z'), fmt)
+        t1 = datetime.strptime(end_iso.rstrip('Z'), fmt)
+        return int((t1 - t0).total_seconds() * 1000)
+    except Exception:
+        return -1
+
+
+class _DailyCsvWriter:
+    """CSV writer dengan daily rotation — file baru setiap hari (YYYYMMDD)."""
+
+    def __init__(self, log_dir: str, prefix: str, fieldnames: list):
+        self._log_dir = log_dir
+        self._prefix = prefix
+        self._fieldnames = fieldnames
+        self._date = None
+        self._fh = None
+        self._writer = None
+        os.makedirs(log_dir, exist_ok=True)
+
+    def _rotate(self):
+        today = datetime.now().strftime('%Y%m%d')
+        if today == self._date:
+            return
+        if self._fh:
+            self._fh.close()
+        self._date = today
+        path = os.path.join(self._log_dir, f'{self._prefix}_{today}.csv')
+        first = not os.path.exists(path)
+        self._fh = open(path, 'a', newline='', encoding='utf-8')
+        self._writer = csv.DictWriter(self._fh, fieldnames=self._fieldnames, extrasaction='ignore')
+        if first:
+            self._writer.writeheader()
+
+    def write(self, row: dict):
+        self._rotate()
+        self._writer.writerow(row)
+        self._fh.flush()
+
+    def close(self):
+        if self._fh:
+            self._fh.close()
+            self._fh = None
+
+
+_WAYPOINT_FIELDS = [
+    'waypoint_received_timestamp',
+    'vehicle_code',
+    'waypoint_count',
+    'set_home_from_first',
+    'mavlink_upload_start',
+    'mavlink_upload_end',
+    'execution_result',
+    'execution_message',
+    'status_publish_timestamp',
+    'duration_ms',
+]
 
 
 class WaypointNode(Node):
@@ -81,6 +153,18 @@ class WaypointNode(Node):
         self._cmd_client     = self.create_client(CommandLong, '/mavros/cmd/command')
         self._status_pub     = self.create_publisher(String, 'waypoint_status', 10)
 
+        # ── Waypoint log context ───────────────────────────────────────────
+        self._wp_log: dict = {}  # running context, overwritten per request
+
+        # ── CSV Logger ─────────────────────────────────────────────────────
+        self.declare_parameter('logger.log_dir', '~/Seano_ws/ros_log')
+        _log_dir = os.path.expanduser(self.get_parameter('logger.log_dir').value)
+        self._waypoint_csv = _DailyCsvWriter(
+            os.path.join(_log_dir, 'command'),
+            'waypoint_log',
+            _WAYPOINT_FIELDS,
+        )
+
         # ── MQTT client ────────────────────────────────────────────────────
         self._client = mqtt.Client()
         self._client.on_connect    = self._on_connect
@@ -97,14 +181,16 @@ class WaypointNode(Node):
         self._client.reconnect_delay_set(min_delay=1, max_delay=30)
 
         try:
-            self._client.connect(self._broker, self._port, keepalive=self._keepalive)
             self._client.loop_start()
+            # connect_async keeps node alive when DNS/network is not ready at boot.
+            self._client.connect_async(self._broker, self._port, keepalive=self._keepalive)
             self.get_logger().info(
-                f"Waypoint node terhubung ke MQTT {self._broker}:{self._port}"
+                f"Waypoint MQTT connect scheduled: {self._broker}:{self._port}"
             )
         except Exception as exc:
-            self.get_logger().error(f"Gagal koneksi MQTT: {exc}")
-            raise SystemExit
+            self.get_logger().error(
+                f"Gagal startup MQTT (node tetap jalan, retry otomatis): {exc}"
+            )
 
         self.get_logger().info(
             f"Waypoint node aktif — vehicle: {self._vehicle_id} | "
@@ -132,13 +218,23 @@ class WaypointNode(Node):
             self.get_logger().error(f"Payload tidak valid: {exc}")
             return
 
+        received_ts = _now_iso()
+        self._wp_log = {
+            'waypoint_received_timestamp': received_ts,
+            'vehicle_code': self._vehicle_id,
+            'mavlink_upload_start': '',
+            'mavlink_upload_end': '',
+        }
         self._handle_waypoint(payload)
 
     # ── Logika waypoint ───────────────────────────────────────────────────
 
     def _handle_waypoint(self, payload: Any) -> None:
         waypoints_data = self._extract_waypoints(payload)
-        self.get_logger().info(f"Menerima {len(waypoints_data)} waypoint")
+        self.get_logger().info(f"📍 Menerima {len(waypoints_data)} waypoint")
+
+        self._wp_log['waypoint_count'] = len(waypoints_data)
+        self._wp_log['set_home_from_first'] = self._should_set_home(payload)
 
         if not waypoints_data:
             self._publish_status("Tidak ada waypoint yang diberikan", False)
@@ -260,6 +356,7 @@ class WaypointNode(Node):
             return
 
         self.get_logger().info(f"Upload {len(waypoints)} waypoint ke MAVROS")
+        self._wp_log['mavlink_upload_start'] = _now_iso()
 
         req = WaypointPush.Request()
         req.start_index = 0
@@ -271,6 +368,7 @@ class WaypointNode(Node):
         )
 
     def _push_callback(self, future, wp_count: int) -> None:
+        self._wp_log['mavlink_upload_end'] = _now_iso()
         try:
             response = future.result()
             if response.success:
@@ -286,6 +384,7 @@ class WaypointNode(Node):
     # ── Helper ────────────────────────────────────────────────────────────
 
     def _publish_status(self, message: str, success: bool) -> None:
+        status_publish_ts = _now_iso()
         data = json.dumps({
             "status": "success" if success else "error",
             "message": message,
@@ -296,6 +395,21 @@ class WaypointNode(Node):
         self._status_pub.publish(msg)
         self._client.publish(self._status_topic, data, qos=self._qos)
 
+        # Write waypoint log
+        ctx = self._wp_log
+        self._waypoint_csv.write({
+            'waypoint_received_timestamp': ctx.get('waypoint_received_timestamp', ''),
+            'vehicle_code': ctx.get('vehicle_code', self._vehicle_id),
+            'waypoint_count': ctx.get('waypoint_count', ''),
+            'set_home_from_first': ctx.get('set_home_from_first', ''),
+            'mavlink_upload_start': ctx.get('mavlink_upload_start', ''),
+            'mavlink_upload_end': ctx.get('mavlink_upload_end', ''),
+            'execution_result': 'SUCCESS' if success else 'FAILED',
+            'execution_message': message,
+            'status_publish_timestamp': status_publish_ts,
+            'duration_ms': _duration_ms(ctx.get('waypoint_received_timestamp', ''), status_publish_ts),
+        })
+
     def _wait_for_service(self, client, name: str, retries: int = 5, timeout: float = 1.0) -> bool:
         for attempt in range(1, retries + 1):
             if client.wait_for_service(timeout_sec=timeout):
@@ -305,6 +419,7 @@ class WaypointNode(Node):
         return False
 
     def destroy_node(self) -> None:
+        self._waypoint_csv.close()
         self._client.loop_stop()
         self._client.disconnect()
         super().destroy_node()

@@ -3,8 +3,12 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import String, Float64
 from mavros_msgs.msg import State, VfrHud, RadioStatus
-from sensor_msgs.msg import NavSatFix, Imu, Temperature, BatteryState
+from sensor_msgs.msg import NavSatFix, Imu
+import paho.mqtt.client as mqtt
+import ssl
 import json
+import glob
+from datetime import datetime, timezone
 
 
 class TelemetryNode(Node):
@@ -13,10 +17,22 @@ class TelemetryNode(Node):
 
         # Declare parameters
         self.declare_parameter('system.mode', 'unknown')
-        self.declare_parameter('vehicle.id', 'unknown')
+        self.declare_parameter('vehicle.id', 'USV-001')
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
+        self.declare_parameter('mqtt.username', '')
+        self.declare_parameter('mqtt.password', '')
+        self.declare_parameter('mqtt.battery_topic', '')
 
         self.system_mode = self.get_parameter('system.mode').value
         self.vehicle_id = self.get_parameter('vehicle.id').value
+        self.mqtt_broker = self.get_parameter('mqtt.broker').value
+        self.mqtt_port = int(self.get_parameter('mqtt.port').value)
+        self.mqtt_username = self.get_parameter('mqtt.username').value
+        self.mqtt_password = self.get_parameter('mqtt.password').value
+        self.mqtt_battery_topic = self.get_parameter('mqtt.battery_topic').value
+        if not self.mqtt_battery_topic:
+            self.mqtt_battery_topic = f"seano/{self.vehicle_id}/Battery"
 
         # Data from MAVROS
         self.armed = False
@@ -36,7 +52,6 @@ class TelemetryNode(Node):
         self.speed = 0.0
         self.rssi = 0
         self.gps_ok = False
-        self.temperature_system = 0.0
         self.system_status = "UNKNOWN"
 
         # QoS Profile for MAVROS topics (BEST_EFFORT to match MAVROS)
@@ -51,7 +66,7 @@ class TelemetryNode(Node):
             State,
             '/mavros/state',
             self.state_callback,
-            10
+            sensor_qos
         )
 
         self.gps_sub = self.create_subscription(
@@ -68,20 +83,12 @@ class TelemetryNode(Node):
             sensor_qos
         )
 
-        # Subscribe to battery status
-        self.battery_sub = self.create_subscription(
-            BatteryState,
-            '/mavros/battery',
-            self.battery_callback,
-            10
-        )
-
         # Subscribe to VFR HUD for speed
         self.vfr_sub = self.create_subscription(
             VfrHud,
             '/mavros/vfr_hud',
             self.vfr_callback,
-            10
+            sensor_qos
         )
 
         # Subscribe to radio status for RSSI
@@ -89,15 +96,7 @@ class TelemetryNode(Node):
             RadioStatus,
             '/mavros/radio_status',
             self.radio_callback,
-            10
-        )
-
-        # Subscribe to temperature (if available)
-        self.temp_sub = self.create_subscription(
-            Temperature,
-            '/mavros/temperature',
-            self.temperature_callback,
-            10
+            sensor_qos
         )
 
         # Publisher for telemetry (JSON format)
@@ -109,9 +108,20 @@ class TelemetryNode(Node):
 
         self.timer = self.create_timer(1.0, self.publish_telemetry)
 
+        self.mqtt_client = mqtt.Client()
+        if self.mqtt_username:
+            self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
+        self.mqtt_client.tls_set(cert_reqs=ssl.CERT_NONE)
+        self.mqtt_client.tls_insecure_set(True)
+        self.mqtt_client.on_connect = self._mqtt_on_connect
+        self.mqtt_client.on_message = self._mqtt_on_message
+        self.mqtt_client.connect_async(self.mqtt_broker, self.mqtt_port, keepalive=60)
+        self.mqtt_client.loop_start()
+
         self.get_logger().info(f'Telemetry node started')
         self.get_logger().info(f'Vehicle ID   : {self.vehicle_id}')
         self.get_logger().info(f'System Mode : {self.system_mode}')
+        self.get_logger().info(f'Battery MQTT Topic : {self.mqtt_battery_topic}')
 
     def state_callback(self, msg):
         """Callback for MAVROS state (armed, mode)"""
@@ -134,11 +144,53 @@ class TelemetryNode(Node):
         # NavSatFix status: 0=no fix, 1=fix, 2=SBAS fix, 3=GBAS fix
         self.gps_ok = (msg.status.status >= 0)
 
-    def battery_callback(self, msg):
-        """Callback for battery status (sensor_msgs/BatteryState)"""
-        self.battery_voltage = msg.voltage
-        self.battery_current = msg.current
-        self.battery_percentage = int(msg.percentage) if msg.percentage >= 0 else 0
+    def _mqtt_on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            client.subscribe(self.mqtt_battery_topic, qos=1)
+            self.get_logger().info(f'Subscribed battery MQTT: {self.mqtt_battery_topic}')
+        else:
+            self.get_logger().warn(f'Battery MQTT connect failed rc={rc}')
+
+    def _as_float(self, data, keys, default):
+        for key in keys:
+            if key in data and data[key] is not None:
+                try:
+                    return float(data[key])
+                except Exception:
+                    continue
+        return default
+
+    def _mqtt_on_message(self, client, userdata, msg):
+        payload = msg.payload.decode('utf-8', errors='ignore').strip()
+        if not payload:
+            return
+
+        try:
+            data = json.loads(payload)
+        except Exception:
+            return
+
+        self.battery_voltage = self._as_float(
+            data,
+            ['battery_voltage', 'voltage', 'volt', 'v'],
+            self.battery_voltage,
+        )
+
+        # Current can be missing; force default to 0.0 when unavailable.
+        self.battery_current = self._as_float(
+            data,
+            ['battery_current', 'current', 'amp', 'current_a'],
+            0.0,
+        )
+
+        pct = self._as_float(
+            data,
+            ['battery_percentage', 'percentage', 'soc', 'capacity'],
+            self.battery_percentage,
+        )
+        if pct <= 1.0:
+            pct = pct * 100.0
+        self.battery_percentage = round(max(0.0, min(100.0, pct)), 1)
 
     def vfr_callback(self, msg):
         """Callback for VFR HUD (speed)"""
@@ -148,9 +200,19 @@ class TelemetryNode(Node):
         """Callback for radio status (RSSI)"""
         self.rssi = msg.rssi
 
-    def temperature_callback(self, msg):
-        """Callback for temperature"""
-        self.temperature_system = msg.temperature
+    def _read_jetson_temperature(self):
+        """Read CPU temperature from Jetson thermal zone"""
+        try:
+            paths = glob.glob('/sys/class/thermal/thermal_zone*/temp')
+            temps = []
+            for path in paths:
+                with open(path, 'r') as f:
+                    temps.append(int(f.read().strip()))
+            if temps:
+                return max(temps) / 1000.0  # milicelsius -> celsius
+        except Exception:
+            pass
+        return 0.0
 
     def imu_callback(self, msg):
         """Callback for IMU data"""
@@ -199,6 +261,7 @@ class TelemetryNode(Node):
         """Publish telemetry data in JSON format"""
         telemetry_data = {
             "vehicle_code": self.vehicle_id,
+            "usv_timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
             "battery_voltage": round(self.battery_voltage, 1),
             "battery_current": round(self.battery_current, 1),
             "battery_percentage": self.battery_percentage,
@@ -215,7 +278,7 @@ class TelemetryNode(Node):
             "roll": round(self.roll, 1),
             "pitch": round(self.pitch, 1),
             "yaw": round(self.yaw, 1),
-            "temperature_system": round(self.temperature_system, 1)
+            "temperature_system": f"{round(self._read_jetson_temperature(), 1)}"
         }
         
         msg = String()
@@ -225,6 +288,13 @@ class TelemetryNode(Node):
 def main():
     rclpy.init()
     node = TelemetryNode()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    try:
+        rclpy.spin(node)
+    finally:
+        try:
+            node.mqtt_client.loop_stop()
+            node.mqtt_client.disconnect()
+        except Exception:
+            pass
+        node.destroy_node()
+        rclpy.shutdown()

@@ -36,9 +36,58 @@ Isi section tersebut memuat:
 
 ## Build Workspace
 
+> **Catatan penting**: Selalu build dari folder `src/` untuk menghindari konflik dengan `resource_git/`.
+
+### Build semua package
+
 ```bash
-cd /home/seano/Seano_ws
-colcon build --symlink-install
+cd ~/Seano_ws
+colcon build --base-paths src
+source install/setup.bash
+```
+
+### Build satu package saja
+
+```bash
+cd ~/Seano_ws
+colcon build --base-paths src --packages-select <nama_package>
+source install/setup.bash
+```
+
+Contoh:
+```bash
+colcon build --base-paths src --packages-select seano_cam
+colcon build --base-paths src --packages-select seano_mission
+```
+
+### Daftar package yang tersedia
+
+| Package | Keterangan |
+|---|---|
+| `seano_cam` | Kamera USB + RTMP streaming |
+| `seano_mission` | Monitor misi (waypoint, home, status) |
+| `seano_command` | Kontrol USV (thruster, waypoint) |
+| `seano_telemetry` | Telemetri dari MAVROS (speed, GPS, IMU, battery) |
+| `seano_mqtt_bridge` | Bridge ROS2 ↔ MQTT |
+| `seano_communication` | Manajemen koneksi GSM/WiFi |
+| `seano_failsafe` | Monitor baterai + failsafe |
+| `seano_logging` | Logger telemetri ke file |
+| `seano_startup` | Launch file sistem lengkap |
+| `seano_anti_theft` | Anti-theft via MAVLink |
+| `seano_oceanography` | Sensor oseanografi (CTD, ADCP) |
+| `seano_vision` | YOLO object detection + streaming |
+
+### Troubleshooting build
+
+Kalau build gagal dengan error `--uninstall not recognized`:
+```bash
+pip3 install "setuptools<80"
+```
+
+Kalau build gagal dengan error duplikat package:
+```bash
+# Pastikan pakai --base-paths src
+colcon build --base-paths src
 ```
 
 ## Setup Environment
@@ -57,6 +106,38 @@ Launch semua node sekaligus dengan launch file:
 
 ```bash
 ros2 launch seano_startup system.launch.py
+```
+
+### Auto Start Saat Jetson Boot
+
+Kalau ingin sistem langsung nyala saat Jetson boot tanpa buka terminal, pakai installer `systemd` yang ada di workspace ini:
+
+```bash
+cd /home/seano/Seano_ws
+sudo ./scripts/install_seano_autostart.sh
+```
+
+Setelah itu full stack akan otomatis jalan saat boot melalui `start_seano.sh`.
+
+Perintah penting:
+
+```bash
+sudo systemctl start seano.service
+sudo systemctl restart seano.service
+sudo systemctl status seano.service
+journalctl -u seano.service -f
+```
+
+Kalau ingin ubah mode startup default, edit file:
+
+```bash
+/etc/default/seano
+```
+
+Contoh isi:
+
+```bash
+SEANO_START_ARGS="--no-vision"
 ```
 
 Launch file ini akan menjalankan:

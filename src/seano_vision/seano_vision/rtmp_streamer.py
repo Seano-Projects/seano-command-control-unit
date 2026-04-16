@@ -7,6 +7,7 @@ Supports streaming to services like YouTube Live, Facebook Live, atau custom RTM
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
@@ -46,7 +47,7 @@ class RTMPStreamer(Node):
         
         camera_topic = self.get_parameter('camera.topic').value
         if not camera_topic:
-            camera_topic = '/camera/image_annotated'
+            camera_topic = '/seano/camera/image_raw'
         self.camera_topic = camera_topic
         
         self.bridge = CvBridge()
@@ -69,12 +70,17 @@ class RTMPStreamer(Node):
         # Start ffmpeg process
         self.start_ffmpeg()
         
-        # Subscribe to camera topic
+        # Subscribe to camera topic (BEST_EFFORT to match camera_node publisher)
+        best_effort_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1
+        )
         self.subscription = self.create_subscription(
             Image,
             self.camera_topic,
             self.image_callback,
-            10
+            best_effort_qos
         )
         
         self.get_logger().info('Waiting for camera frames...')
@@ -82,7 +88,6 @@ class RTMPStreamer(Node):
     def start_ffmpeg(self):
         """Start ffmpeg process for RTMP streaming"""
         try:
-            # FFmpeg command for RTMP streaming (low latency optimized)
             command = [
                 'ffmpeg',
                 '-f', 'rawvideo',

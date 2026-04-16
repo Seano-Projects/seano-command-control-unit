@@ -40,6 +40,19 @@
       enable: true
       path: /data/logs
       format: csv
+      mount_point: /media/seano/SEANO_SSD
+      flush_interval: 3.0
+      auto_mount: true
+      device_uuid: ""
+      device_label: SEANO_SSD
+      topics:
+        gps: /mavros/global_position/global
+        imu: /mavros/imu/data
+        battery: /mavros/battery
+        ctd: oceanography/ctd
+        adcp: oceanography/adcp
+        sbes: oceanography/sbes
+        telemetry: telemetry
 
     mqtt:
       broker: mqtt.seano.cloud
@@ -49,17 +62,50 @@
       qos: 1
       base_topic: seano
       keepalive: 60
+      status_keepalive: 5
       heartbeat_interval: 30.0
+
+    oceanography:
+      ctd:
+        sensor_code: CTD-MIDAS-3000
+        timezone: Asia/Jakarta
+        gps_topic: /mavros/global_position/global
+        default_latitude: -6.2000000
+        default_longitude: 106.8166667
+        default_altitude: 0.0
+        publish_topic: oceanography/ctd
+        publish_rate_hz: 1.0
+        max_depth_m: 120.0
+        cycle_seconds: 120.0
+
+    mission:
+      auto_set_home_from_first_waypoint: true
+
+    thruster:
+      pwm_neutral: 1500
+      pwm_min: 1000
+      pwm_max: 2000
+      channel_throttle: 2    # CH3 (0-indexed) — throttle ArduRover
+      channel_steering: 0    # CH1 (0-indexed) — steering ArduRover
+      allow_reverse: true
 
     failsafe:
       battery:
         serial_port: /dev/ttyTHS0
         baudrate: 115200
         check_interval: 1.0
-        min_voltage: 10.5
-        max_voltage: 12.6
+        min_voltage: 11.2
+        max_voltage: 14.6
         low_voltage_threshold: 11.1
         critical_voltage_threshold: 10.8
+        use_internal_dummy: true
+        battery_id: 1
+        cell_count: 6
+        base_temperature_c: 31.0
+        temp_rise_per_amp: 0.75
+        discharge_rate_pct_per_min: 0.35
+        min_current: 2.0
+        max_current: 5.8
       communication:
         check_interval: 2.0
         wifi_interface: wlP1p1s0
@@ -76,3 +122,41 @@
         failsafe_mode: RTL
         notification_delay: 2.0
         recovery_delay: 10.0
+
+    anti_theft:
+      loop_rate_hz: 1.0
+      alert_topic: anti_theft/alert
+      target_speed_mps: 1.0
+      mavros:
+        gps_topic: /mavros/global_position/global
+        imu_topic: /mavros/imu/data
+        vfr_topic: /mavros/vfr_hud
+        state_topic: /mavros/state
+        rc_in_topic: /mavros/rc/in
+        set_mode_service: /mavros/set_mode
+      mqtt_enabled: true
+      geofence_limit: 10.0
+      crit_tilt_deg: 10.0
+      tilt_confirm_time: 7.0
+      rc_failsafe_pwm: 975
+      mission_speed_margin: 1.5
+
+    collision_avoidance:
+      enable_full_stack: true
+      enable_actuation_stack: true
+      camera_launch: phase2_camera_usb_test.launch.py
+      image_topic: /seano/camera/image_raw_reliable
+      annotated_topic: /camera/image_annotated
+      detections_topic: /camera/detections
+
+    camera:
+      topic: /seano/camera/image_raw
+
+    rtmp:
+      enable: true
+      url: rtmp://72.61.141.126:1935/live/{vehicle_id}
+      fps: 30
+      width: 320
+      height: 240
+      bitrate: 300k
+      preset: ultrafast

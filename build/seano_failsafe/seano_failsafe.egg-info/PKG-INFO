@@ -1,13 +1,16 @@
-Metadata-Version: 2.1
-Name: seano-failsafe
+Metadata-Version: 2.4
+Name: seano_failsafe
 Version: 0.0.0
 Summary: SEANO Failsafe System - Battery monitoring and emergency procedures
-Home-page: UNKNOWN
 Maintainer: seano
 Maintainer-email: dzikriibnuf@gmail.com
 License: Apache-2.0
-Platform: UNKNOWN
+Requires-Dist: setuptools
 Provides-Extra: test
-
-UNKNOWN
-
+Requires-Dist: pytest; extra == "test"
+Dynamic: license
+Dynamic: maintainer
+Dynamic: maintainer-email
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: summary

@@ -33,7 +33,7 @@ class SeanoCommunicationMonitorNode(Node):
         # Subscribe to communication node status
         self.comm_node_sub = self.create_subscription(
             String,
-            '/communication/status',
+                '/usv/communication/status',
             self.comm_node_callback,
             10
         )

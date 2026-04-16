@@ -1,1 +1,1 @@
-mavros_msgs:rclpy:std_msgs
+mavros_msgs:python3-paho-mqtt:rclpy:std_msgs

@@ -1,34 +1,61 @@
 # seano_startup
 
-Package orchestration untuk start sistem USV secara terpusat menggunakan launch file dan parameter global.
+Package orchestration untuk start sistem USV secara terpusat menggunakan launch file dan parameter global. Package ini juga berisi node MQTT bridge yang menghubungkan ROS 2 dengan MQTT broker.
 
 ## Fungsi Utama
 
 - Menyediakan konfigurasi global di `config/system.yaml`
-- Menjalankan MAVROS dan node-node utama package lain lewat `launch/system.launch.py`
+- Menjalankan MAVROS dan semua node utama lewat `launch/system.launch.py`
 - Memberikan parameter yang konsisten ke semua node
+- MQTT bridge (publish telemetri & failsafe) dan MQTT status (online/offline heartbeat)
+
+## Node
+
+| Node | Executable | Keterangan |
+|------|-----------|-----------|
+| `mqtt_bridge` | `mqtt_bridge_node` | Subscribe ROS → publish ke MQTT broker |
+| `mqtt_status` | `mqtt_status_node` | Publish status online/offline + heartbeat ke MQTT |
+
+## MQTT Topics
+
+### Publish (ke broker)
+
+| MQTT Topic | Sumber ROS | Keterangan |
+|------------|-----------|-----------|
+| `seano/{vehicle_id}/telemetry` | `/usv/telemetry` | JSON telemetri lengkap |
+| `seano/{vehicle_id}/failsafe` | `/usv/failsafe/alert` | Alert failsafe |
+| `seano/{vehicle_id}/status` | — | `"online"` / `"offline"` (retain=true) |
+| `seano/{vehicle_id}/raw` | `/usv/raw/log` dan `/rosout` | Raw log stream (plain text / JSON) |
+
+### Subscribe (dari broker)
+
+Tidak ada subscribe MQTT di startup — perintah dari MQTT dihandle `seano_command`.
 
 ## Launch
 
-- `system.launch.py` menjalankan:
-  - `mavros` launch (`apm.launch`)
-  - `seano_vision` full CA stack (`demo_full_ca.launch.py`)
-  - `seano_vision` actuation stack (`run_auto_stack.launch.py`)
-  - `seano_telemetry/telemetry_node`
-  - `seano_logging/telemetry_logger_node`
-  - `seano_logging/logger_node`
-  - `seano_mqtt_bridge/mqtt_bridge_node`
-  - `seano_mqtt_bridge/mqtt_status_node`
-  - `seano_command/command_node`
-  - `seano_communication/communication_node`
-  - `seano_anti_theft/anti_theft_node`
-  - `seano_oceanography/ctd_sensor_node`
-  - `seano_failsafe/seano_battery`
-  - `seano_failsafe/seano_communication_monitor`
-  - `seano_failsafe/seano_failsafe`
-  - `seano_cam/rtmp_streamer` (stream output vision ke RTMP)
+`system.launch.py` menjalankan semua komponen berikut dalam namespace `usv`:
 
-Catatan: launch ini memakai namespace `usv`, jadi topic/node akan ter-prefix `usv`.
+| Node | Package |
+|------|---------|
+| `mavros` | mavros |
+| `seano_vision` full CA stack | seano_vision |
+| `seano_vision` actuation stack | seano_vision (conditional) |
+| `telemetry_node` | seano_telemetry |
+| `mqtt_bridge_node` | **seano_startup** |
+| `mqtt_status_node` | **seano_startup** |
+| `command_node` | seano_command |
+| `mission_node` | seano_mission |
+| `thruster_node` | seano_command |
+| `communication_node` | seano_communication |
+| `anti_theft_node` | seano_anti_theft |
+| `ctd_sensor_node` | seano_oceanography |
+| `seano_battery` | seano_failsafe |
+| `seano_communication_monitor` | seano_failsafe |
+| `seano_failsafe` | seano_failsafe |
+| `rtmp_streamer` | seano_vision (conditional) |
+| `csv_logger_node` | seano_logger |
+
+Catatan: launch ini memakai namespace `usv`, jadi topic/node akan ter-prefix `/usv/`.
 
 ## Konfigurasi
 
@@ -38,8 +65,8 @@ Catatan: launch ini memakai namespace `usv`, jadi topic/node akan ter-prefix `us
 ## Integrasi Kamera
 
 - Sumber kamera utama: `seano_vision`.
-- Streaming RTMP: `seano_cam/rtmp_streamer` subscribe ke `camera.topic` (default `/camera/image_annotated`).
-- Dengan skema ini, tidak perlu menjalankan `seano_cam/camera_node` bersamaan dengan `seano_vision/camera_node`, sehingga bentrok device kamera bisa dihindari.
+- Streaming RTMP: `rtmp_streamer` (dari `seano_vision`) subscribe ke `camera.topic` (default `/camera/image_raw`).
+- Dengan skema ini, tidak perlu menjalankan camera node terpisah, sehingga bentrok device kamera bisa dihindari.
 
 ## Profil Otomatis Vision
 
@@ -69,42 +96,71 @@ ros2 launch seano_startup system.launch.py vision_det_max_fps:=8.0 vision_det_im
 
 ## MQTT
 
-Tidak ada client MQTT di package ini, tetapi package ini menyuplai parameter MQTT global untuk package lain.
+Node `mqtt_bridge_node` terhubung ke broker saat startup dan langsung forward data. Node `mqtt_status_node` dijalankan di urutan awal launch, mengirim heartbeat, dan menggunakan Last Will & Testament (LWT) MQTT sehingga broker otomatis menerima pesan `"offline"` jika koneksi putus.
 
-## Jalankan
+`seano_mission/mission_node` menangani upload waypoint dari MQTT dan publish ACK ke `seano/{vehicle_id}/waypoint/status`.
+
+Parameter status yang relevan di `config/system.yaml`:
+
+- `mqtt.status_keepalive` (default: `5` detik): keepalive khusus node status. Nilai lebih kecil membuat `offline` lebih cepat terdeteksi oleh broker saat Jetson mati mendadak.
+- `mqtt.heartbeat_interval` (default: `30.0` detik): interval publish `online` retain.
+
+Catatan: untuk mati mendadak (power loss), deteksi `offline` tetap mengikuti timeout keepalive broker (bukan instant absolut), tapi dengan keepalive kecil transisinya jauh lebih cepat.
+
+## Cara Menjalankan
 
 ```bash
+# Full system
 ros2 launch seano_startup system.launch.py
+
+# Atau pakai helper script
+cd ~/Seano_ws && ./start_seano.sh
 ```
 
-## Mode Menjalankan (Fleksibel)
+## Auto Start Saat Boot Jetson
 
-### 1) Jalan bareng semua package (full system)
+Supaya semua package langsung jalan saat Jetson menyala, gunakan `systemd` dan panggil helper installer dari workspace:
 
 ```bash
-ros2 launch seano_startup system.launch.py
+cd ~/Seano_ws
+sudo ./scripts/install_seano_autostart.sh
 ```
 
-Atau pakai helper script:
+Installer ini akan:
+
+- membuat service `seano.service`
+- mengaktifkan autostart saat boot
+- tetap memakai `start_seano.sh` sebagai entrypoint utama
+
+Perintah operasional:
 
 ```bash
-cd /home/seano/Seano_ws
-./start_seano.sh
+sudo systemctl start seano.service
+sudo systemctl restart seano.service
+sudo systemctl status seano.service
+journalctl -u seano.service -f
 ```
 
-### 2) Jalan satu-satu (per package)
-
-Gunakan perintah `ros2 run` atau `ros2 launch` pada README masing-masing package jika ingin debug modular.
-
-Contoh minimal:
+Untuk mengubah argumen default boot, edit:
 
 ```bash
-ros2 run seano_telemetry telemetry_node --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
-ros2 run seano_mqtt_bridge mqtt_bridge_node --ros-args --params-file /home/seano/Seano_ws/src/seano_startup/config/system.yaml
+/etc/default/seano
 ```
 
-### Cek cepat
+Contoh:
 
 ```bash
+SEANO_START_ARGS="--no-vision"
+```
+
+Untuk debug per package, jalankan node mandiri:
+
+```bash
+ros2 run seano_telemetry telemetry_node --ros-args --params-file ~/Seano_ws/src/seano_startup/config/system.yaml
+ros2 run seano_startup mqtt_bridge_node --ros-args --params-file ~/Seano_ws/src/seano_startup/config/system.yaml
+```
+
+```bash
+# Cek node yang jalan
 ros2 node list | grep /usv/
 ```
