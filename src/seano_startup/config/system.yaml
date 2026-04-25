@@ -65,6 +65,21 @@
       status_keepalive: 5
       heartbeat_interval: 30.0
 
+    transport:
+      mode: mqtt  # mqtt, api, both
+
+    api:
+      base_url: https://api.seano.cloud
+      auth:
+        type: apikey  # apikey, jwt, none
+        api_key: "usv_53f8432ef11ef40840766429095ed1cc2d5609bca283890c74ec7de0fea752c5"  # use SEANO_API_KEY env var
+      timeout_sec: 5.0
+      queue_size: 200
+      command_poll_interval_sec: 2.0
+      command_poll_limit: 1
+      mission_poll_interval_sec: 3.0
+      mission_poll_limit: 1
+
     oceanography:
       ctd:
         sensor_code: CTD-MIDAS-3000
@@ -80,6 +95,7 @@
 
     mission:
       auto_set_home_from_first_waypoint: true
+      auto_append_rtl_on_complete: true
 
     thruster:
       pwm_neutral: 1500

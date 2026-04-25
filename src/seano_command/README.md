@@ -109,6 +109,7 @@ Menerima perintah ARM/DISARM dan pergantian mode flight dari web, lalu meneruska
 
 ### Fungsi
 Menerima daftar waypoint dari web, opsional set home dari waypoint pertama, lalu upload mission ke flight controller lewat MAVROS.
+Secara default node juga menambahkan RTL sebagai item terakhir mission.
 
 ### Input (MQTT Subscribe)
 
@@ -120,6 +121,7 @@ Menerima daftar waypoint dari web, opsional set home dari waypoint pertama, lalu
 ```json
 {
   "set_home_from_first_waypoint": true,
+  "auto_rtl_on_complete": true,
   "waypoints": [
     {"lat": -6.2001, "lon": 106.8167, "alt": 0.0},
     {"lat": -6.2005, "lon": 106.8172, "alt": 0.0}
@@ -160,6 +162,11 @@ Menerima daftar waypoint dari web, opsional set home dari waypoint pertama, lalu
 1. Default: waypoint pertama dijadikan home point sebelum upload (`auto_set_home_from_first_waypoint: true`)
 2. Bisa di-override per-payload dengan field `"set_home_from_first_waypoint": false`
 3. Jika set home gagal → upload dibatalkan (mencegah RTL ke home yang salah)
+
+### Logika RTL selesai mission
+1. Default: node menambahkan `RETURN_TO_LAUNCH` sebagai item terakhir mission (`auto_append_rtl_on_complete: true`)
+2. Bisa di-override per-payload dengan field `"auto_rtl_on_complete": false`
+3. RTL akan kembali ke HOME yang aktif di flight controller
 
 ### Output
 
@@ -253,6 +260,7 @@ thruster:
 # Parameter waypoint_node
 mission:
   auto_set_home_from_first_waypoint: true
+  auto_append_rtl_on_complete: true
 ```
 
 ---
@@ -445,4 +453,3 @@ seano_command/
 | Waypoint upload gagal — "Set home gagal" | FC tidak merespons command set home | Cek koneksi FC, coba set `auto_set_home_from_first_waypoint: false` |
 | Thruster tidak bergerak | `/mavros/rc/override` tidak diterima | Pastikan mode MANUAL di FC, cek channel mapping di config |
 | Node crash saat start | Vehicle ID `UNKNOWN` atau MQTT gagal konek | Set `vehicle.id` di system.yaml dan pastikan broker reachable |
-

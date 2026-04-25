@@ -65,6 +65,7 @@ def generate_launch_description():
     vision_det_conf = LaunchConfiguration('vision_det_conf')
     vision_camera_launch = LaunchConfiguration('vision_camera_launch')
     enable_failsafe = LaunchConfiguration('enable_failsafe')
+    fcu_url = LaunchConfiguration('fcu_url')
     gcs_url = LaunchConfiguration('gcs_url')
 
     vision_full_ca_launch = IncludeLaunchDescription(
@@ -123,7 +124,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            'fcu_url': '/dev/ttyACM0:115200',
+            'fcu_url': fcu_url,
             'gcs_url': gcs_url,
         }.items()
     )
@@ -140,7 +141,8 @@ def generate_launch_description():
         DeclareLaunchArgument('vision_det_conf', default_value=profile_defaults['vision_det_conf']),
         DeclareLaunchArgument('vision_camera_launch', default_value=profile_defaults['vision_camera_launch']),
         DeclareLaunchArgument('enable_failsafe', default_value=os.getenv('SEANO_ENABLE_FAILSAFE', 'false')),
-        DeclareLaunchArgument('gcs_url', default_value=os.getenv('SEANO_GCS_URL', 'udp://@127.0.0.1:14550')),
+        DeclareLaunchArgument('fcu_url', default_value=os.getenv('SEANO_FCU_URL', '/dev/ttyACM0:115200')),
+        DeclareLaunchArgument('gcs_url', default_value=os.getenv('SEANO_GCS_URL', 'udp://@100.124.223.119:14550')),
         suppress_mavros_param_log,
         mavros_launch,
         vision_full_ca_launch,
@@ -187,6 +189,14 @@ def generate_launch_description():
                 package='seano_command',
                 executable='command_node',
                 name='command',
+                parameters=[param_file],
+                output='screen'
+            ),
+
+            Node(
+                package='seano_command',
+                executable='waypoint_node',
+                name='waypoint',
                 parameters=[param_file],
                 output='screen'
             ),
