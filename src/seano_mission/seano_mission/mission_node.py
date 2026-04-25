@@ -31,6 +31,7 @@ class MissionNode(Node):
         self.declare_parameter('mqtt.use_tls', True)
         self.declare_parameter('mqtt.tls_insecure', True)
         self.declare_parameter('mission.auto_set_home_from_first_waypoint', True)
+        self.declare_parameter('mission.auto_append_rtl_on_complete', True)
 
         # Mission state
         self.current_waypoint_seq = 0
@@ -60,6 +61,9 @@ class MissionNode(Node):
         self.mqtt_tls_insecure = bool(self.get_parameter('mqtt.tls_insecure').value)
         self.auto_set_home_from_first_waypoint = bool(
             self.get_parameter('mission.auto_set_home_from_first_waypoint').value
+        )
+        self.auto_append_rtl_on_complete = bool(
+            self.get_parameter('mission.auto_append_rtl_on_complete').value
         )
 
         self.waypoint_topic = f'{self.mqtt_base_topic}/{self.vehicle_id}/waypoint'
@@ -257,6 +261,10 @@ class MissionNode(Node):
             self._publish_waypoint_ack('FAILED', 'Tidak ada waypoint valid untuk diupload')
             return
 
+        if self._should_append_rtl(payload) and waypoint_list[-1].command != 20:
+            waypoint_list.append(self._build_rtl_waypoint())
+            self.get_logger().info('Menambahkan RTL sebagai item terakhir mission')
+
         if should_set_home:
             self._set_home_then_push(waypoint_list)
         else:
@@ -269,6 +277,21 @@ class MissionNode(Node):
         override = payload.get('set_home_from_first_waypoint')
         if override is None:
             return self.auto_set_home_from_first_waypoint
+        if isinstance(override, bool):
+            return override
+        if isinstance(override, str):
+            return override.strip().lower() in ('1', 'true', 'yes', 'on')
+        return bool(override)
+
+    def _should_append_rtl(self, payload: Any) -> bool:
+        if not isinstance(payload, dict):
+            return self.auto_append_rtl_on_complete
+
+        override = payload.get('auto_rtl_on_complete')
+        if override is None:
+            override = payload.get('append_rtl_on_complete')
+        if override is None:
+            return self.auto_append_rtl_on_complete
         if isinstance(override, bool):
             return override
         if isinstance(override, str):
@@ -320,6 +343,14 @@ class MissionNode(Node):
         waypoint.x_lat = lat
         waypoint.y_long = lon
         waypoint.z_alt = alt
+        return waypoint
+
+    def _build_rtl_waypoint(self) -> Waypoint:
+        waypoint = Waypoint()
+        waypoint.frame = 3
+        waypoint.command = 20  # MAV_CMD_NAV_RETURN_TO_LAUNCH
+        waypoint.is_current = False
+        waypoint.autocontinue = True
         return waypoint
 
     def _set_home_then_push(self, waypoint_list: List[Waypoint]):

@@ -65,6 +65,7 @@ class CTDSensorNode(Node):
         self.declare_parameter('oceanography.ctd.publish_topic', 'oceanography/ctd')
         self.declare_parameter('oceanography.ctd.publish_rate_hz', 2.0)
         self.declare_parameter('vehicle.id', 'USV-001')
+        self.declare_parameter('transport.mode', 'mqtt')
         self.declare_parameter('oceanography.ctd.sensor_code', 'CTD-MIDAS-3000')
         self.declare_parameter('oceanography.ctd.timezone', 'Asia/Jakarta')
         self.declare_parameter('oceanography.ctd.gps_topic', '/mavros/global_position/global')
@@ -85,6 +86,10 @@ class CTDSensorNode(Node):
         period = 1.0 / max(rate_hz, 0.1)
         self.vehicle_code = self.get_parameter('vehicle.id').value
         self.sensor_code = self.get_parameter('oceanography.ctd.sensor_code').value
+        transport_mode = str(self.get_parameter('transport.mode').value).strip().lower()
+        if transport_mode not in ('mqtt', 'api', 'both'):
+            transport_mode = 'mqtt'
+        self._enable_mqtt = transport_mode in ('mqtt', 'both')
         self.timezone_name = self.get_parameter('oceanography.ctd.timezone').value
         self.gps_topic = self.get_parameter('oceanography.ctd.gps_topic').value
         self.latitude = float(self.get_parameter('oceanography.ctd.default_latitude').value)
@@ -144,6 +149,9 @@ class CTDSensorNode(Node):
         self.gps_ok = msg.status.status >= 0
 
     def _create_mqtt_client(self):
+        if not self._enable_mqtt:
+            self.get_logger().info('CTD MQTT disabled (transport.mode=api)')
+            return None
         client = mqtt.Client()
         if self.mqtt_username:
             client.username_pw_set(self.mqtt_username, self.mqtt_password)

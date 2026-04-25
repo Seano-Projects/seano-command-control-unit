@@ -2,12 +2,14 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import String, Float64
-from mavros_msgs.msg import State, VfrHud, RadioStatus
+from mavros_msgs.msg import State, VfrHud
 from sensor_msgs.msg import NavSatFix, Imu
 import paho.mqtt.client as mqtt
 import ssl
 import json
 import glob
+import os
+import time
 from datetime import datetime, timezone
 
 
@@ -23,6 +25,7 @@ class TelemetryNode(Node):
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.battery_topic', '')
+        self.declare_parameter('communication.ethernet_interface', '')
 
         self.system_mode = self.get_parameter('system.mode').value
         self.vehicle_id = self.get_parameter('vehicle.id').value
@@ -31,6 +34,7 @@ class TelemetryNode(Node):
         self.mqtt_username = self.get_parameter('mqtt.username').value
         self.mqtt_password = self.get_parameter('mqtt.password').value
         self.mqtt_battery_topic = self.get_parameter('mqtt.battery_topic').value
+        self.net_iface = str(self.get_parameter('communication.ethernet_interface').value).strip()
         if not self.mqtt_battery_topic:
             self.mqtt_battery_topic = f"seano/{self.vehicle_id}/Battery"
 
@@ -39,7 +43,9 @@ class TelemetryNode(Node):
         self.mode = "UNKNOWN"
         self.latitude = 0.0
         self.longitude = 0.0
-        self.altitude = 0.0
+        self.altitude_msl = None
+        self.altitude_rel = None
+        self.altitude_baro = None
         self.heading = 0.0
         self.roll = 0.0
         self.pitch = 0.0
@@ -50,9 +56,13 @@ class TelemetryNode(Node):
         self.battery_current = 0.0
         self.battery_percentage = 0
         self.speed = 0.0
-        self.rssi = 0
         self.gps_ok = False
         self.system_status = "UNKNOWN"
+        self.net_rx_mbps = 0.0
+        self.net_tx_mbps = 0.0
+        self._net_prev = None
+        self._net_prev_time = None
+        self._net_warned = False
 
         # QoS Profile for MAVROS topics (BEST_EFFORT to match MAVROS)
         sensor_qos = QoSProfile(
@@ -76,6 +86,13 @@ class TelemetryNode(Node):
             sensor_qos
         )
 
+        self.rel_alt_sub = self.create_subscription(
+            Float64,
+            '/mavros/global_position/rel_alt',
+            self.rel_alt_callback,
+            sensor_qos
+        )
+
         self.imu_sub = self.create_subscription(
             Imu,
             '/mavros/imu/data',
@@ -91,13 +108,6 @@ class TelemetryNode(Node):
             sensor_qos
         )
 
-        # Subscribe to radio status for RSSI
-        self.radio_sub = self.create_subscription(
-            RadioStatus,
-            '/mavros/radio_status',
-            self.radio_callback,
-            sensor_qos
-        )
 
         # Publisher for telemetry (JSON format)
         self.publisher_ = self.create_publisher(
@@ -122,6 +132,8 @@ class TelemetryNode(Node):
         self.get_logger().info(f'Vehicle ID   : {self.vehicle_id}')
         self.get_logger().info(f'System Mode : {self.system_mode}')
         self.get_logger().info(f'Battery MQTT Topic : {self.mqtt_battery_topic}')
+        if self.net_iface:
+            self.get_logger().info(f'Network Interface : {self.net_iface}')
 
     def state_callback(self, msg):
         """Callback for MAVROS state (armed, mode)"""
@@ -138,11 +150,15 @@ class TelemetryNode(Node):
         """Callback for GPS position"""
         self.latitude = msg.latitude
         self.longitude = msg.longitude
-        self.altitude = msg.altitude
+        self.altitude_msl = msg.altitude
         
         # Check GPS fix status
         # NavSatFix status: 0=no fix, 1=fix, 2=SBAS fix, 3=GBAS fix
         self.gps_ok = (msg.status.status >= 0)
+
+    def rel_alt_callback(self, msg):
+        """Callback for relative altitude (home-referenced)."""
+        self.altitude_rel = msg.data
 
     def _mqtt_on_connect(self, client, userdata, flags, rc):
         if rc == 0:
@@ -194,10 +210,7 @@ class TelemetryNode(Node):
     def vfr_callback(self, msg):
         """Callback for VFR HUD (speed)"""
         self.speed = msg.groundspeed
-
-    def radio_callback(self, msg):
-        """Callback for radio status (RSSI)"""
-        self.rssi = msg.rssi
+        self.altitude_baro = msg.altitude
 
     def _read_jetson_temperature(self):
         """Read CPU temperature from Jetson thermal zone"""
@@ -212,6 +225,59 @@ class TelemetryNode(Node):
         except Exception:
             pass
         return 0.0
+
+    def _read_net_bytes(self):
+        if not self.net_iface:
+            return None
+
+        base = f"/sys/class/net/{self.net_iface}/statistics"
+        rx_path = os.path.join(base, 'rx_bytes')
+        tx_path = os.path.join(base, 'tx_bytes')
+
+        try:
+            with open(rx_path, 'r') as f:
+                rx_bytes = int(f.read().strip())
+            with open(tx_path, 'r') as f:
+                tx_bytes = int(f.read().strip())
+            return rx_bytes, tx_bytes
+        except Exception as exc:
+            if not self._net_warned:
+                self.get_logger().warn(
+                    f"Network interface '{self.net_iface}' not readable: {exc}"
+                )
+                self._net_warned = True
+        return None
+
+    def _update_network_rate(self):
+        sample = self._read_net_bytes()
+        now = time.monotonic()
+
+        if sample is None:
+            self.net_rx_mbps = 0.0
+            self.net_tx_mbps = 0.0
+            return
+
+        if self._net_prev is None or self._net_prev_time is None:
+            self._net_prev = sample
+            self._net_prev_time = now
+            return
+
+        dt = now - self._net_prev_time
+        if dt <= 0.0:
+            return
+
+        rx_delta = sample[0] - self._net_prev[0]
+        tx_delta = sample[1] - self._net_prev[1]
+
+        if rx_delta < 0 or tx_delta < 0:
+            self._net_prev = sample
+            self._net_prev_time = now
+            return
+
+        self.net_rx_mbps = (rx_delta * 8.0) / (1_000_000.0 * dt)
+        self.net_tx_mbps = (tx_delta * 8.0) / (1_000_000.0 * dt)
+        self._net_prev = sample
+        self._net_prev_time = now
 
     def imu_callback(self, msg):
         """Callback for IMU data"""
@@ -258,16 +324,24 @@ class TelemetryNode(Node):
 
     def publish_telemetry(self):
         """Publish telemetry data in JSON format"""
+        self._update_network_rate()
+        altitude = self.altitude_baro
+        if altitude is None:
+            altitude = self.altitude_rel
+        if altitude is None:
+            altitude = self.altitude_msl
+        if altitude is None:
+            altitude = 0.0
+
         telemetry_data = {
             "vehicle_code": self.vehicle_id,
             "usv_timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
             "battery_voltage": round(self.battery_voltage, 1),
             "battery_current": round(self.battery_current, 1),
             "battery_percentage": self.battery_percentage,
-            "rssi": self.rssi,
             "latitude": round(self.latitude, 6),
             "longitude": round(self.longitude, 6),
-            "altitude": round(self.altitude, 1),
+            "altitude": round(altitude, 1),
             "heading": round(self.heading, 1),
             "armed": self.armed,
             "gps_ok": self.gps_ok,
@@ -277,7 +351,10 @@ class TelemetryNode(Node):
             "roll": round(self.roll, 1),
             "pitch": round(self.pitch, 1),
             "yaw": round(self.yaw, 1),
-            "temperature_system": f"{round(self._read_jetson_temperature(), 1)}"
+            "temperature_system": f"{round(self._read_jetson_temperature(), 1)}",
+            "network_iface": self.net_iface,
+            "download_mbps": round(self.net_rx_mbps, 2),
+            "upload_mbps": round(self.net_tx_mbps, 2)
         }
         
         msg = String()

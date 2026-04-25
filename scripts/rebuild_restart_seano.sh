@@ -1,6 +1,6 @@
 #!/bin/bash
-# Rebuild package ROS2 tertentu lalu restart seano.service
-# Default package: seano_startup
+# Rebuild semua package ROS2 lalu restart seano.service
+# Default: build semua package
 
 set -euo pipefail
 
@@ -8,7 +8,8 @@ WS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROS_SETUP="/opt/ros/humble/setup.bash"
 SERVICE_NAME="seano.service"
 
-PKGS=("seano_startup")
+PKGS=()
+BUILD_ALL=true
 NO_SUDO=false
 
 usage() {
@@ -17,6 +18,7 @@ Usage:
   ./scripts/rebuild_restart_seano.sh [OPTIONS]
 
 Options:
+    (default)         Build semua package
   --pkg <name>        Tambah package untuk dibuild (bisa diulang)
   --no-sudo           Jangan pakai sudo saat restart/status service
   -h, --help          Tampilkan bantuan
@@ -43,6 +45,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --pkg)
             [[ $# -lt 2 ]] && { err "Missing value for --pkg"; exit 1; }
+            BUILD_ALL=false
             PKGS+=("$2")
             shift 2
             ;;
@@ -72,23 +75,26 @@ if [[ ! -d "$WS_DIR" ]]; then
     exit 1
 fi
 
-# Deduplicate package list sambil jaga urutan
-DEDUP_PKGS=()
-for p in "${PKGS[@]}"; do
-    skip=false
-    for e in "${DEDUP_PKGS[@]}"; do
-        if [[ "$p" == "$e" ]]; then
-            skip=true
-            break
+log "Workspace: $WS_DIR"
+if [[ "$BUILD_ALL" == true ]]; then
+    log "Build package: semua"
+else
+    # Deduplicate package list sambil jaga urutan
+    DEDUP_PKGS=()
+    for p in "${PKGS[@]}"; do
+        skip=false
+        for e in "${DEDUP_PKGS[@]}"; do
+            if [[ "$p" == "$e" ]]; then
+                skip=true
+                break
+            fi
+        done
+        if [[ "$skip" == false ]]; then
+            DEDUP_PKGS+=("$p")
         fi
     done
-    if [[ "$skip" == false ]]; then
-        DEDUP_PKGS+=("$p")
-    fi
-done
-
-log "Workspace: $WS_DIR"
-log "Build package: ${DEDUP_PKGS[*]}"
+    log "Build package: ${DEDUP_PKGS[*]}"
+fi
 
 cd "$WS_DIR"
 # shellcheck source=/dev/null
@@ -96,7 +102,11 @@ set +u
 source "$ROS_SETUP"
 set -u
 
-colcon build --packages-select "${DEDUP_PKGS[@]}"
+if [[ "$BUILD_ALL" == true ]]; then
+    colcon build --symlink-install
+else
+    colcon build --symlink-install --packages-select "${DEDUP_PKGS[@]}"
+fi
 
 if [[ -f "$WS_DIR/install/setup.bash" ]]; then
     # shellcheck source=/dev/null

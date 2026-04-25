@@ -1,6 +1,6 @@
 # seano_telemetry
 
-Package ROS2 yang bertugas sebagai **pusat pengumpul data sensor** dari flight controller (ArduPilot/ArduRover via MAVROS). Node ini mengkonsolidasikan data state, GPS, IMU, baterai, kecepatan, RSSI, dan suhu menjadi satu paket JSON yang dipublish setiap 1 detik dan dikonsumsi oleh package lain (MQTT bridge, logger, CSV logger).
+Package ROS2 yang bertugas sebagai **pusat pengumpul data sensor** dari flight controller (ArduPilot/ArduRover via MAVROS). Node ini mengkonsolidasikan data state, GPS, IMU, baterai, kecepatan, dan suhu menjadi satu paket JSON yang dipublish setiap 1 detik dan dikonsumsi oleh package lain (MQTT bridge, logger, CSV logger).
 
 ---
 
@@ -49,7 +49,6 @@ Flight Controller (ArduPilot/ArduRover)
    │  /mavros/imu/data                     │
    │  /mavros/battery                      │  ◄── MAVROS topics
    │  /mavros/vfr_hud                      │
-   │  /mavros/radio_status                 │
    │  /sys/.../thermal_zone*/temp          │  ◄── Jetson sysfs
    │                                       │
    └──────────────┬────────────────────────┘
@@ -80,10 +79,10 @@ seano_startup  seano_logger   (custom)
 |---|---|---|---|
 | `/mavros/state` | `mavros_msgs/State` | Reliable, depth 10 | `armed`, `mode`, `connected` |
 | `/mavros/global_position/global` | `sensor_msgs/NavSatFix` | Best Effort, depth 10 | `latitude`, `longitude`, `altitude`, `status.status` (GPS fix) |
+| `/mavros/global_position/rel_alt` | `std_msgs/Float64` | Best Effort, depth 10 | `altitude` relatif terhadap home (diprioritaskan) |
 | `/mavros/imu/data` | `sensor_msgs/Imu` | Best Effort, depth 10 | `orientation` (quaternion) → konversi ke `roll`, `pitch`, `yaw`, `heading` |
 | `/mavros/battery` | `sensor_msgs/BatteryState` | Reliable, depth 10 | `voltage`, `current`, `percentage` |
-| `/mavros/vfr_hud` | `mavros_msgs/VfrHud` | Reliable, depth 10 | `groundspeed` → `speed` |
-| `/mavros/radio_status` | `mavros_msgs/RadioStatus` | Reliable, depth 10 | `rssi` |
+| `/mavros/vfr_hud` | `mavros_msgs/VfrHud` | Reliable, depth 10 | `groundspeed` → `speed`, `altitude` (baro) |
 | `/sys/class/thermal/thermal_zone*/temp` | File sistem Linux | Dibaca langsung tiap publish | Ambil nilai tertinggi dari semua thermal zone → `temperature_system` |
 
 **Catatan QoS:** Topic GPS dan IMU menggunakan `BEST_EFFORT` karena MAVROS memang mempublish dengan QoS tersebut. Mismatch QoS akan membuat subscription tidak menerima data samapai sekali pun.
@@ -107,7 +106,6 @@ seano_startup  seano_logger   (custom)
   "battery_voltage":       25.2,
   "battery_current":       3.1,
   "battery_percentage":    75.0,
-  "rssi":                  180,
   "latitude":              -6.200123,
   "longitude":             106.816700,
   "altitude":              12.5,
@@ -120,7 +118,10 @@ seano_startup  seano_logger   (custom)
   "roll":                  0.5,
   "pitch":                 -0.2,
   "yaw":                   270.0,
-  "temperature_system":    "42.3"
+  "temperature_system":    "42.3",
+  "network_iface":          "enP8p1s0",
+  "download_mbps":           12.34,
+  "upload_mbps":             3.21
 }
 ```
 
@@ -132,10 +133,9 @@ seano_startup  seano_logger   (custom)
 | `battery_voltage` | V | `/mavros/battery` → `voltage` | Dibulatkan 1 desimal |
 | `battery_current` | A | `/mavros/battery` → `current` | Dibulatkan 1 desimal |
 | `battery_percentage` | % | `/mavros/battery` → `percentage × 100` | Dibulatkan 1 desimal |
-| `rssi` | 0–255 | `/mavros/radio_status` → `rssi` | Kekuatan sinyal radio RC |
 | `latitude` | derajat | `/mavros/global_position/global` | Dibulatkan 6 desimal |
 | `longitude` | derajat | `/mavros/global_position/global` | Dibulatkan 6 desimal |
-| `altitude` | m | `/mavros/global_position/global` | MSL, dibulatkan 1 desimal |
+| `altitude` | m | `/mavros/vfr_hud` (utama), fallback `/mavros/global_position/rel_alt` → `/mavros/global_position/global` | Altitude baro (selaras MP); fallback rel_alt/MSL jika VFR belum tersedia |
 | `heading` | derajat 0–360 | `/mavros/imu/data` (yaw) | Yaw ternormalisasi ke 0–360° |
 | `armed` | bool | `/mavros/state` → `armed` | `true` jika motor di-arm |
 | `gps_ok` | bool | `/mavros/global_position/global` → `status.status >= 0` | `true` jika ada GPS fix |
@@ -146,6 +146,9 @@ seano_startup  seano_logger   (custom)
 | `pitch` | derajat | `/mavros/imu/data` (quaternion) | Dibulatkan 1 desimal |
 | `yaw` | derajat | `/mavros/imu/data` (quaternion) | Dibulatkan 1 desimal |
 | `temperature_system` | °C | `/sys/class/thermal/thermal_zone*/temp` | Suhu tertinggi dari thermal zone Jetson (CPU), dibaca tiap publish, sebagai string |
+| `network_iface` | — | `/sys/class/net/<iface>/statistics/*` | Nama interface yang dipantau (dari param `communication.ethernet_interface`) |
+| `download_mbps` | Mbps | `/sys/class/net/<iface>/statistics/rx_bytes` | Throughput download rata-rata per publish |
+| `upload_mbps` | Mbps | `/sys/class/net/<iface>/statistics/tx_bytes` | Throughput upload rata-rata per publish |
 
 ---
 
@@ -205,6 +208,7 @@ Semua parameter dibaca dari `system.yaml` via `--params-file`:
 |---|---|---|
 | `vehicle.id` | `"USV-001"` | ID kendaraan, masuk ke field `vehicle_code` di JSON |
 | `system.mode` | `"unknown"` | Mode operasi sistem (field, test, dev) — tersimpan di node tapi tidak masuk payload JSON saat ini |
+| `communication.ethernet_interface` | `""` | Interface LAN untuk hitung Mbps (contoh: `enP8p1s0`) |
 
 Konfigurasi di `src/seano_startup/config/system.yaml`:
 
@@ -370,7 +374,6 @@ cat /sys/class/thermal/thermal_zone*/temp
 | `roll`, `pitch`, `yaw` selalu `0.0` | IMU subscription tidak menerima data | Cek QoS `/mavros/imu/data` harus `BEST_EFFORT`; pastikan FC mengirim IMU data |
 | `battery_voltage: 0.0` terus | `/mavros/battery` tidak ada data dari FC | Cek apakah FC dikonfigurasi mengirim BATTERY_STATUS MAVLink message |
 | `system_status: "DISCONNECTED"` | MAVROS tidak terhubung ke FC | Pastikan MAVROS berjalan dan FC power on; cek `/mavros/state` → `connected: true` |
-| `rssi: 0` terus | Tidak ada radio RC atau FC tidak kirim RADIO_STATUS | Normal jika tidak ada radio RC; bisa diabaikan |
 | `temperature_system: "0.0"` terus | Tidak ada path `/sys/class/thermal/thermal_zone*/temp` | Pastikan berjalan di Jetson; path thermal zone harus ada |
 | Node tidak publish sama sekali | Timer tidak jalan atau node crash saat init | Cek log: `ros2 run seano_telemetry telemetry_node --ros-args ...` dan lihat output error |
 | Topic `/usv/telemetry` tidak ada | Node dirun tanpa namespace | Gunakan `system.launch.py` atau tambah `--remap __ns:=/usv` |
