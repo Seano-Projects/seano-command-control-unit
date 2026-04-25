@@ -1,4 +1,3 @@
-README.md
 package.xml
 setup.cfg
 setup.py
@@ -15,6 +14,10 @@ resource/seano_startup
 seano_startup/__init__.py
 seano_startup/mqtt_bridge_node.py
 seano_startup/mqtt_status_node.py
-test/test_copyright.py
-test/test_flake8.py
-test/test_pep257.py
+seano_startup.egg-info/PKG-INFO
+seano_startup.egg-info/SOURCES.txt
+seano_startup.egg-info/dependency_links.txt
+seano_startup.egg-info/entry_points.txt
+seano_startup.egg-info/requires.txt
+seano_startup.egg-info/top_level.txt
+seano_startup.egg-info/zip-safe

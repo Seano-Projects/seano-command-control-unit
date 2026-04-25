@@ -5,3 +5,7 @@ install
 doc
 __pycache__
 *.pyc
+
+.codex
+
+mav.*
