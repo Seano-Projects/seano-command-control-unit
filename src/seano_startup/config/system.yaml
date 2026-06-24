@@ -1,6 +1,5 @@
 /**:
   ros__parameters:
-
     system:
       name: USV-SEANO
       version: 1.0
@@ -51,7 +50,6 @@
         battery: /mavros/battery
         ctd: oceanography/ctd
         adcp: oceanography/adcp
-        sbes: oceanography/sbes
         telemetry: telemetry
 
     mqtt:
@@ -66,13 +64,32 @@
       heartbeat_interval: 30.0
 
     transport:
-      mode: mqtt  # mqtt, api, both
+      mode: mqtt # mqtt, api, both
+
+    validation:
+      force_gps_fix_for_publish: true
+      allow_fallback_coords_without_gps: true
+      fallback_latitude: -6.8133906
+      fallback_longitude: 107.6431498
+      fallback_motion_enabled: true
+      fallback_motion_radius_m: 30.0
+      fallback_motion_period_sec: 180.0
+      fallback_motion_north_scale: 0.7
+
+    telemetry:
+      altitude_reference: relative # relative, msl, baro
+      relative_alt_max_abs_m: 200.0
+      gps_fix_min: 0
+
+    arming:
+      gps_topic: /mavros/global_position/global
+      gps_fix_min: 0
 
     api:
       base_url: https://api.seano.cloud
       auth:
-        type: apikey  # apikey, jwt, none
-        api_key: "usv_53f8432ef11ef40840766429095ed1cc2d5609bca283890c74ec7de0fea752c5"  # use SEANO_API_KEY env var
+        type: apikey # apikey, jwt, none
+        api_key: "usv_ad603da47908cc4fcc7474535b16d88cb0bc91368d71bdb66220c7d70b251093" # use SEANO_API_KEY env var
       timeout_sec: 5.0
       queue_size: 200
       command_poll_interval_sec: 2.0
@@ -85,13 +102,24 @@
         sensor_code: CTD-MIDAS-3000
         timezone: Asia/Jakarta
         gps_topic: /mavros/global_position/global
-        default_latitude: -6.2000000
-        default_longitude: 106.8166667
+        default_latitude: -6.8133906
+        default_longitude: 107.6431498
         default_altitude: 0.0
         publish_topic: oceanography/ctd
         publish_rate_hz: 1.0
         max_depth_m: 120.0
         cycle_seconds: 120.0
+      adcp:
+        sensor_code: ADCP-WORKHORSE
+        timezone: Asia/Jakarta
+        gps_topic: /mavros/global_position/global
+        vfr_topic: /mavros/vfr_hud
+        default_latitude: -6.8133906
+        default_longitude: 107.6431498
+        default_altitude: 0.0
+        publish_topic: oceanography/adcp
+        publish_rate_hz: 1.0
+        max_water_depth_m: 250.0
 
     mission:
       auto_set_home_from_first_waypoint: true
@@ -101,8 +129,8 @@
       pwm_neutral: 1500
       pwm_min: 1000
       pwm_max: 2000
-      channel_throttle: 2    # CH3 (0-indexed) — throttle ArduRover
-      channel_steering: 0    # CH1 (0-indexed) — steering ArduRover
+      channel_throttle: 2 # CH3 (0-indexed) — throttle ArduRover
+      channel_steering: 0 # CH1 (0-indexed) — steering ArduRover
       allow_reverse: true
 
     failsafe:

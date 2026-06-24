@@ -12,15 +12,58 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import math
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from functools import partial
 
-_TZ = ZoneInfo('Asia/Jakarta')
+_ID_TZ_WIB = ZoneInfo('Asia/Jakarta')
+_ID_TZ_WITA = ZoneInfo('Asia/Makassar')
+_ID_TZ_WIT = ZoneInfo('Asia/Jayapura')
+_DEFAULT_TZ = _ID_TZ_WIB
 
 
-def _now_iso() -> str:
-    return datetime.now(_TZ).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
+def _gps_ok(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value > 0
+    if isinstance(value, str):
+        return value.strip().lower() in {'true', '1', 'yes', 'ok'}
+    return False
+
+
+def _coords_valid(lat, lon) -> bool:
+    try:
+        lat_f = float(lat)
+        lon_f = float(lon)
+    except (TypeError, ValueError):
+        return False
+    if not (-90.0 <= lat_f <= 90.0 and -180.0 <= lon_f <= 180.0):
+        return False
+    if abs(lat_f) < 1e-6 and abs(lon_f) < 1e-6:
+        return False
+    return True
+
+
+def _resolve_timezone(lat=None, lon=None, gps_ok=None):
+    if not _gps_ok(gps_ok) or not _coords_valid(lat, lon):
+        return _DEFAULT_TZ
+    lon_f = float(lon)
+    if lon_f < 112.5:
+        return _ID_TZ_WIB
+    if lon_f < 127.5:
+        return _ID_TZ_WITA
+    return _ID_TZ_WIT
+
+
+def _has_valid_coords(lat=None, lon=None, gps_ok=None) -> bool:
+    return _gps_ok(gps_ok) and _coords_valid(lat, lon)
+
+
+def _now_iso(lat=None, lon=None, gps_ok=None) -> str:
+    tz = _resolve_timezone(lat, lon, gps_ok)
+    return datetime.now(tz).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
 
 
 class _DailyCsvWriter:
@@ -61,7 +104,7 @@ class _DailyCsvWriter:
 
 
 _TELEMETRY_FIELDS = [
-    'usv_timestamp', 'vehicle_code',
+    'date_time', 'vehicle_code',
     'battery_voltage', 'battery_current', 'battery_percentage',
     'rssi', 'mode', 'latitude', 'longitude', 'altitude',
     'heading', 'armed', 'gps_ok', 'system_status',
@@ -76,13 +119,24 @@ class MqttBridgeNode(Node):
 
         self.declare_parameter('vehicle.id', 'UNKNOWN')
         self.declare_parameter('transport.mode', 'mqtt')
-        self.declare_parameter('mqtt.broker', 'localhost')
-        self.declare_parameter('mqtt.port', 1883)
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.base_topic', 'seano')
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.raw_topic_suffix', 'raw')
+        self.declare_parameter('mqtt.alert_topic', '')
+        self.declare_parameter('telemetry.gps_alert_interval_sec', 30.0)
+        self.declare_parameter('telemetry.gps_alert_max_duration_sec', 3600.0)
+        self.declare_parameter('validation.force_gps_fix_for_publish', True)
+        self.declare_parameter('validation.allow_fallback_coords_without_gps', False)
+        self.declare_parameter('validation.fallback_latitude', 0.0)
+        self.declare_parameter('validation.fallback_longitude', 0.0)
+        self.declare_parameter('validation.fallback_motion_enabled', True)
+        self.declare_parameter('validation.fallback_motion_radius_m', 25.0)
+        self.declare_parameter('validation.fallback_motion_period_sec', 180.0)
+        self.declare_parameter('validation.fallback_motion_north_scale', 0.7)
         self.declare_parameter('api.base_url', 'https://api.seano.cloud')
         self.declare_parameter('api.auth.type', 'none')
         self.declare_parameter('api.auth.api_key', '')
@@ -106,6 +160,48 @@ class MqttBridgeNode(Node):
         self.base_topic = self.get_parameter('mqtt.base_topic').value
         self.qos = int(self.get_parameter('mqtt.qos').value)
         self.raw_topic_suffix = self.get_parameter('mqtt.raw_topic_suffix').value
+        self.alert_mqtt_topic = str(self.get_parameter('mqtt.alert_topic').value).strip()
+        self.gps_alert_interval_sec = max(
+            1.0,
+            float(self.get_parameter('telemetry.gps_alert_interval_sec').value)
+        )
+        self.gps_alert_max_duration_sec = max(
+            0.0,
+            float(self.get_parameter('telemetry.gps_alert_max_duration_sec').value)
+        )
+        self.force_gps_fix_for_publish = bool(
+            self.get_parameter('validation.force_gps_fix_for_publish').value
+        )
+        self.allow_fallback_coords_without_gps = bool(
+            self.get_parameter('validation.allow_fallback_coords_without_gps').value
+        )
+        self.fallback_latitude = float(
+            self.get_parameter('validation.fallback_latitude').value
+        )
+        self.fallback_longitude = float(
+            self.get_parameter('validation.fallback_longitude').value
+        )
+        self.fallback_motion_enabled = bool(
+            self.get_parameter('validation.fallback_motion_enabled').value
+        )
+        self.fallback_motion_radius_m = max(
+            0.0,
+            float(self.get_parameter('validation.fallback_motion_radius_m').value)
+        )
+        self.fallback_motion_period_sec = max(
+            20.0,
+            float(self.get_parameter('validation.fallback_motion_period_sec').value)
+        )
+        self.fallback_motion_north_scale = max(
+            0.1,
+            min(1.0, float(self.get_parameter('validation.fallback_motion_north_scale').value))
+        )
+        self._fallback_motion_t0 = time.monotonic()
+        if not self.alert_mqtt_topic:
+            self.alert_mqtt_topic = f"{self.base_topic}/{self.vehicle_id}/alert"
+        self._gps_alert_last_ts = 0.0
+        self._gps_alert_start_ts = 0.0
+        self._gps_ready_prev = False
 
         self.mqtt_topic = f"{self.base_topic}/{self.vehicle_id}/telemetry"
         self.failsafe_mqtt_topic = f"{self.base_topic}/{self.vehicle_id}/failsafe"
@@ -134,8 +230,7 @@ class MqttBridgeNode(Node):
             if self.mqtt_username:
                 self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
-            self.client.tls_set(cert_reqs=ssl.CERT_NONE)
-            self.client.tls_insecure_set(True)
+            self.client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
 
             self.client.loop_start()
             self._connect_mqtt(initial=True)
@@ -236,12 +331,96 @@ class MqttBridgeNode(Node):
         # Reconnect watchdog to survive transient DNS/network failures after reboot.
         if self._enable_mqtt:
             self.create_timer(10.0, self._reconnect_if_needed)
+        self.get_logger().info(
+            f"force_gps_fix_for_publish={self.force_gps_fix_for_publish}"
+        )
+        self.get_logger().info(
+            f"allow_fallback_coords_without_gps={self.allow_fallback_coords_without_gps}"
+        )
+        self.get_logger().info(
+            f"fallback_motion_enabled={self.fallback_motion_enabled}, "
+            f"radius_m={self.fallback_motion_radius_m}, "
+            f"period_sec={self.fallback_motion_period_sec}"
+        )
+
+    def _offset_m_to_coords(self, center_lat, center_lon, east_m, north_m):
+        # Convert local EN offset (meters) to lat/lon around center point.
+        lat_scale = 111320.0
+        lon_scale = 111320.0 * max(0.1, math.cos(math.radians(float(center_lat))))
+        lat = float(center_lat) + (north_m / lat_scale)
+        lon = float(center_lon) + (east_m / lon_scale)
+        return lat, lon
+
+    def _next_fallback_coords(self):
+        center_lat = self.fallback_latitude
+        center_lon = self.fallback_longitude
+        if not self.fallback_motion_enabled or self.fallback_motion_radius_m <= 0.0:
+            return round(center_lat, 7), round(center_lon, 7)
+
+        t = time.monotonic() - self._fallback_motion_t0
+        omega = (2.0 * math.pi) / self.fallback_motion_period_sec
+
+        # Smooth pseudo-route that keeps moving but remains in a bounded area.
+        east_m = self.fallback_motion_radius_m * math.sin(omega * t)
+        north_m = (
+            self.fallback_motion_radius_m
+            * self.fallback_motion_north_scale
+            * math.sin((omega * 0.63 * t) + 0.9)
+        )
+        lat, lon = self._offset_m_to_coords(center_lat, center_lon, east_m, north_m)
+        return round(lat, 7), round(lon, 7)
+
+    def _maybe_publish_gps_alert(self, lat=None, lon=None, gps_ok=None):
+        gps_ready = _has_valid_coords(lat, lon, gps_ok)
+        if gps_ready:
+            self._gps_ready_prev = True
+            self._gps_alert_last_ts = 0.0
+            self._gps_alert_start_ts = 0.0
+            return
+
+        if self._gps_ready_prev:
+            self._gps_ready_prev = False
+            self._gps_alert_last_ts = 0.0
+            self._gps_alert_start_ts = 0.0
+
+        now = time.monotonic()
+        if self._gps_alert_start_ts == 0.0:
+            self._gps_alert_start_ts = now
+        if self.gps_alert_max_duration_sec > 0.0:
+            if (now - self._gps_alert_start_ts) >= self.gps_alert_max_duration_sec:
+                return
+        if (now - self._gps_alert_last_ts) < self.gps_alert_interval_sec:
+            return
+
+        payload = {
+            'vehicle_code': self.vehicle_id,
+            'message': 'GPS no fix; telemetry/sensor skipped',
+            'severity': 'warning',
+            'alert_type': 'GPS',
+        }
+        if _coords_valid(lat, lon):
+            payload['latitude'] = round(float(lat), 6)
+            payload['longitude'] = round(float(lon), 6)
+
+        if self.client is not None:
+            self.client.publish(
+                self.alert_mqtt_topic,
+                json.dumps(payload, separators=(',', ':')),
+                qos=self.qos,
+                retain=False
+            )
+
+        if self._enable_api:
+            alert_payload = self._normalize_alert(payload, 'gps', payload['message'])
+            self._api_enqueue('POST', '/alerts', alert_payload)
+
+        self._gps_alert_last_ts = now
 
     def _connect_mqtt(self, initial=False):
         if not self._enable_mqtt or self.client is None:
             return
         try:
-            self.client.connect(self.mqtt_broker, self.mqtt_port, keepalive=60)
+            self.client.connect_async(self.mqtt_broker, self.mqtt_port, keepalive=60)
             if initial:
                 self.get_logger().info(
                     f"Connecting to MQTT broker {self.mqtt_broker}:{self.mqtt_port} ..."
@@ -276,28 +455,54 @@ class MqttBridgeNode(Node):
             self.get_logger().warn(f"MQTT disconnected unexpectedly rc={rc}; retrying")
 
     def telemetry_callback(self, msg):
-        mqtt_publish_ts = _now_iso()
+        row = self._safe_json(msg.data)
+        if not isinstance(row, dict):
+            return
+
+        lat = row.get('latitude')
+        lon = row.get('longitude')
+        gps_ok = row.get('gps_ok')
+        if self.force_gps_fix_for_publish:
+            self._maybe_publish_gps_alert(lat, lon, gps_ok)
+            has_fix = _has_valid_coords(lat, lon, gps_ok)
+            if (
+                not has_fix
+                and self.allow_fallback_coords_without_gps
+                and _coords_valid(self.fallback_latitude, self.fallback_longitude)
+            ):
+                fb_lat, fb_lon = self._next_fallback_coords()
+                row['latitude'] = fb_lat
+                row['longitude'] = fb_lon
+                row['gps_ok'] = False
+                lat = row['latitude']
+                lon = row['longitude']
+                gps_ok = row['gps_ok']
+                has_fix = True
+            if not has_fix:
+                return
+
+        publish_payload = json.dumps(row)
+        row['mqtt_publish_timestamp'] = _now_iso(lat, lon, gps_ok)
+        self._telemetry_csv.write(row)
+
         if self._mqtt_connected:
             self.client.publish(
                 self.mqtt_topic,
-                msg.data,
+                publish_payload,
                 qos=self.qos
             )
-            self._publish_raw(msg.data)
-        row = self._safe_json(msg.data)
-        if isinstance(row, dict):
-            row['mqtt_publish_timestamp'] = mqtt_publish_ts
-            self._telemetry_csv.write(row)
-            if self._enable_api:
-                self._api_enqueue('POST', '/vehicle-logs', row)
-                self._api_enqueue(
-                    'POST',
-                    '/raw-logs',
-                    {
-                        'vehicle_code': row.get('vehicle_code', self.vehicle_id),
-                        'logs': msg.data,
-                    }
-                )
+            self._publish_raw(publish_payload)
+
+        if self._enable_api:
+            self._api_enqueue('POST', '/vehicle-logs', row)
+            self._api_enqueue(
+                'POST',
+                '/raw-logs',
+                {
+                    'vehicle_code': row.get('vehicle_code', self.vehicle_id),
+                    'logs': publish_payload,
+                }
+            )
 
     def failsafe_callback(self, msg):
         if self._mqtt_connected:
@@ -342,6 +547,52 @@ class MqttBridgeNode(Node):
                 self._api_enqueue('POST', '/missions/waypoint-reached', data)
 
     def raw_string_callback(self, msg: String, source: str = 'raw'):
+        if source == 'sensor':
+            data = self._safe_json(msg.data)
+            if not isinstance(data, dict) or not data.get('sensor_code'):
+                return
+            lat = data.get('latitude')
+            lon = data.get('longitude')
+            gps_ok = data.get('gps_ok')
+
+            if self.force_gps_fix_for_publish:
+                has_fix = _has_valid_coords(lat, lon, gps_ok)
+                if (
+                    not has_fix
+                    and self.allow_fallback_coords_without_gps
+                    and _coords_valid(self.fallback_latitude, self.fallback_longitude)
+                ):
+                    fb_lat, fb_lon = self._next_fallback_coords()
+                    data['latitude'] = fb_lat
+                    data['longitude'] = fb_lon
+                    data['gps_ok'] = False
+                    has_fix = True
+                if not has_fix:
+                    return
+
+            payload = json.dumps(data)
+
+            self._publish_raw(payload)
+
+            if not self._enable_api:
+                return
+
+            body = {
+                'vehicle_code': data.get('vehicle_code', self.vehicle_id),
+                'sensor_code': data.get('sensor_code'),
+                'data': payload,
+            }
+            self._api_enqueue('POST', '/sensor-logs', body)
+            self._api_enqueue(
+                'POST',
+                '/raw-logs',
+                {
+                    'vehicle_code': data.get('vehicle_code', self.vehicle_id),
+                    'logs': payload,
+                }
+            )
+            return
+
         self._publish_raw(msg.data)
 
         if not self._enable_api:
@@ -349,24 +600,6 @@ class MqttBridgeNode(Node):
 
         payload = msg.data
         data = self._safe_json(payload)
-
-        if source == 'sensor':
-            if isinstance(data, dict) and data.get('sensor_code'):
-                body = {
-                    'vehicle_code': data.get('vehicle_code', self.vehicle_id),
-                    'sensor_code': data.get('sensor_code'),
-                    'data': payload,
-                }
-                self._api_enqueue('POST', '/sensor-logs', body)
-                self._api_enqueue(
-                    'POST',
-                    '/raw-logs',
-                    {
-                        'vehicle_code': data.get('vehicle_code', self.vehicle_id),
-                        'logs': payload,
-                    }
-                )
-                return
 
         if source == 'anti_theft':
             alert_payload = self._normalize_alert(data, 'antitheft', payload)

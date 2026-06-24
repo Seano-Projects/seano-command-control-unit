@@ -1,11 +1,10 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch.actions import DeclareLaunchArgument
 from launch.actions import GroupAction, IncludeLaunchDescription
 from launch.conditions import IfCondition
 from launch_ros.actions import Node, PushRosNamespace
 from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.launch_description_sources import FrontendLaunchDescriptionSource
 import os
 
 import yaml
@@ -65,8 +64,8 @@ def generate_launch_description():
     vision_det_conf = LaunchConfiguration('vision_det_conf')
     vision_camera_launch = LaunchConfiguration('vision_camera_launch')
     enable_failsafe = LaunchConfiguration('enable_failsafe')
-    fcu_url = LaunchConfiguration('fcu_url')
-    gcs_url = LaunchConfiguration('gcs_url')
+    # fcu_url dan gcs_url dikelola oleh mavros.service (systemd)
+    # system.launch tidak spawn mavros sendiri untuk hindari dual mavros_node
 
     vision_full_ca_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -108,27 +107,6 @@ def generate_launch_description():
         condition=IfCondition(enable_vision_actuation),
     )
 
-    # ArduPilot broadcasts all params on connect; MAVROS logs each unsolicited
-    # value at INFO level. Suppress mavros.param to WARN via env var so it
-    # takes effect before mavros_node even starts.
-    suppress_mavros_param_log = SetEnvironmentVariable(
-        'RCUTILS_LOGGING_SEVERITY_MAP',
-        'mavros.param:WARN,mavros.time:WARN'
-    )
-
-    mavros_launch = IncludeLaunchDescription(
-        FrontendLaunchDescriptionSource(
-            os.path.join(
-                '/opt/ros/humble/share/mavros/launch',
-                'apm.launch'
-            )
-        ),
-        launch_arguments={
-            'fcu_url': fcu_url,
-            'gcs_url': gcs_url,
-        }.items()
-    )
-
     return LaunchDescription([
         DeclareLaunchArgument('enable_vision_stack', default_value=profile_defaults['enable_vision_stack']),
         DeclareLaunchArgument(
@@ -141,10 +119,6 @@ def generate_launch_description():
         DeclareLaunchArgument('vision_det_conf', default_value=profile_defaults['vision_det_conf']),
         DeclareLaunchArgument('vision_camera_launch', default_value=profile_defaults['vision_camera_launch']),
         DeclareLaunchArgument('enable_failsafe', default_value=os.getenv('SEANO_ENABLE_FAILSAFE', 'false')),
-        DeclareLaunchArgument('fcu_url', default_value=os.getenv('SEANO_FCU_URL', '/dev/ttyACM0:115200')),
-        DeclareLaunchArgument('gcs_url', default_value=os.getenv('SEANO_GCS_URL', 'udp://@100.124.223.119:14550')),
-        suppress_mavros_param_log,
-        mavros_launch,
         vision_full_ca_launch,
         vision_actuation_launch,
         
@@ -163,6 +137,14 @@ def generate_launch_description():
                 package='seano_telemetry',
                 executable='telemetry_node',
                 name='telemetry',
+                parameters=[param_file],
+                output='screen'
+            ),
+
+            Node(
+                package='seano_network_monitor',
+                executable='network_monitor_node',
+                name='network_monitor',
                 parameters=[param_file],
                 output='screen'
             ),
@@ -221,6 +203,14 @@ def generate_launch_description():
                 package='seano_oceanography',
                 executable='ctd_sensor_node',
                 name='ctd_sensor',
+                parameters=[param_file],
+                output='screen'
+            ),
+
+            Node(
+                package='seano_oceanography',
+                executable='adcp_sensor_node',
+                name='adcp_sensor',
                 parameters=[param_file],
                 output='screen'
             ),

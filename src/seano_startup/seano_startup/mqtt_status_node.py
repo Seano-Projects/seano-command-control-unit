@@ -10,7 +10,11 @@ import queue
 import threading
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
+
+_LOCAL_TZ = ZoneInfo('Asia/Jakarta')
 
 
 class MqttStatusNode(Node):
@@ -99,10 +103,9 @@ class MqttStatusNode(Node):
             if self.mqtt_username:
                 self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
-            # TLS setup (insecure untuk testing)
+            # TLS setup (system CA, Let's Encrypt)
             try:
-                self.client.tls_set(cert_reqs=ssl.CERT_NONE)
-                self.client.tls_insecure_set(True)
+                self.client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
             except Exception as e:
                 self.get_logger().error(f"TLS setup failed: {e}")
 
@@ -240,12 +243,12 @@ class MqttStatusNode(Node):
             payload = {
                 'vehicle_code': self.vehicle_code,
                 'status': 'online',
-                'timestamp': self._now_iso_utc(),
+                'timestamp': self._now_iso_local(),
             }
             self._api_enqueue('POST', '/vehicle-status', payload)
 
-    def _now_iso_utc(self) -> str:
-        return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    def _now_iso_local(self) -> str:
+        return datetime.now(_LOCAL_TZ).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
 
     def _start_api_worker(self):
         self._api_queue = queue.Queue(maxsize=max(1, self._api_queue_size))
@@ -336,7 +339,7 @@ class MqttStatusNode(Node):
             payload = {
                 'vehicle_code': self.vehicle_code,
                 'status': 'offline',
-                'timestamp': self._now_iso_utc(),
+                'timestamp': self._now_iso_local(),
             }
             self._api_enqueue('POST', '/vehicle-status', payload)
             time.sleep(0.1)
