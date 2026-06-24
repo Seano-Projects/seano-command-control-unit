@@ -17,7 +17,7 @@ setup(
     zip_safe=True,
     maintainer='seano',
     maintainer_email='seano@todo.todo',
-    description='Oceanography sensor nodes for CTD, ADCP, and SBES.',
+    description='Oceanography sensor nodes for CTD and ADCP.',
     license='TODO: License declaration',
     extras_require={
         'test': [
@@ -28,7 +28,6 @@ setup(
         'console_scripts': [
             'ctd_sensor_node = seano_oceanography.ctd_sensor_node:main',
             'adcp_sensor_node = seano_oceanography.adcp_sensor_node:main',
-            'sbes_sensor_node = seano_oceanography.sbes_sensor_node:main',
         ],
     },
 )

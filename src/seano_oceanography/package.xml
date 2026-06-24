@@ -3,7 +3,7 @@
 <package format="3">
   <name>seano_oceanography</name>
   <version>0.0.0</version>
-  <description>Oceanography sensor nodes for CTD, ADCP, and SBES.</description>
+  <description>Oceanography sensor nodes for CTD and ADCP.</description>
   <maintainer email="seano@todo.todo">seano</maintainer>
   <license>TODO: License declaration</license>
 
