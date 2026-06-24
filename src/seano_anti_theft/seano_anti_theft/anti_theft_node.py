@@ -35,15 +35,15 @@ class AntiTheftNode(Node):
         self.declare_parameter('anti_theft.mavros.set_mode_service', '/mavros/set_mode')
 
         self.declare_parameter('anti_theft.mqtt_enabled', True)
-        self.declare_parameter('mqtt.broker', 'localhost')
-        self.declare_parameter('mqtt.port', 1883)
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.base_topic', 'seano')
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.keepalive', 60)
         self.declare_parameter('mqtt.use_tls', True)
-        self.declare_parameter('mqtt.tls_insecure', True)
+        self.declare_parameter('mqtt.tls_insecure', False)
 
         self.declare_parameter('anti_theft.geofence_limit', 10.0)
         self.declare_parameter('anti_theft.crit_tilt_deg', 10.0)
@@ -138,7 +138,7 @@ class AntiTheftNode(Node):
                 self.mqtt_client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
             if self.mqtt_use_tls:
-                self.mqtt_client.tls_set(cert_reqs=ssl.CERT_NONE)
+                self.mqtt_client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
                 self.mqtt_client.tls_insecure_set(self.mqtt_tls_insecure)
 
             self.mqtt_client.connect(self.mqtt_broker, self.mqtt_port, self.mqtt_keepalive)
