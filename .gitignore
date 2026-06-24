@@ -6,6 +6,7 @@ doc
 __pycache__
 *.pyc
 
-.codex
-
 mav.*
+
+
+ros_log/
