@@ -125,15 +125,15 @@ class WaypointNode(Node):
         # ── Parameter ──────────────────────────────────────────────────────
         self.declare_parameter('vehicle.id', 'UNKNOWN')
         self.declare_parameter('transport.mode', 'mqtt')
-        self.declare_parameter('mqtt.broker', 'localhost')
-        self.declare_parameter('mqtt.port', 1883)
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.base_topic', 'seano')
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.keepalive', 60)
         self.declare_parameter('mqtt.use_tls', True)
-        self.declare_parameter('mqtt.tls_insecure', True)
+        self.declare_parameter('mqtt.tls_insecure', False)
         self.declare_parameter('mission.auto_set_home_from_first_waypoint', True)
         self.declare_parameter('mission.auto_append_rtl_on_complete', True)
         self.declare_parameter('api.base_url', 'https://api.seano.cloud')
@@ -200,7 +200,7 @@ class WaypointNode(Node):
                 self._client.username_pw_set(self._username, self._password)
 
             if self._use_tls:
-                self._client.tls_set(cert_reqs=ssl.CERT_NONE)
+                self._client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
                 self._client.tls_insecure_set(self._tls_insecure)
 
             self._client.reconnect_delay_set(min_delay=1, max_delay=30)

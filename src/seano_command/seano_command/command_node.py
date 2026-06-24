@@ -1,7 +1,10 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from std_msgs.msg import String
 from mavros_msgs.srv import CommandLong, SetMode
+from mavros_msgs.msg import StatusText, State
+from sensor_msgs.msg import NavSatFix
 import paho.mqtt.client as mqtt
 import ssl
 import json
@@ -22,6 +25,10 @@ def _now_iso() -> str:
     return datetime.now(_TZ).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
 
 
+def _now_iso_utc() -> str:
+    return datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
 def _duration_ms(start_iso: str, end_iso: str) -> int:
     try:
         fmt = '%Y-%m-%dT%H:%M:%S.%f'
@@ -30,6 +37,19 @@ def _duration_ms(start_iso: str, end_iso: str) -> int:
         return int((t1 - t0).total_seconds() * 1000)
     except Exception:
         return -1
+
+
+def _coords_valid(lat, lon) -> bool:
+    try:
+        lat_f = float(lat)
+        lon_f = float(lon)
+    except (TypeError, ValueError):
+        return False
+    if not (-90.0 <= lat_f <= 90.0 and -180.0 <= lon_f <= 180.0):
+        return False
+    if abs(lat_f) < 1e-6 and abs(lon_f) < 1e-6:
+        return False
+    return True
 
 
 class _DailyCsvWriter:
@@ -80,6 +100,16 @@ _COMMAND_FIELDS = [
     'duration_ms',
 ]
 
+
+_MAV_RESULT_LABELS = {
+    0: 'ACCEPTED',
+    1: 'TEMPORARILY_REJECTED',
+    2: 'DENIED',
+    3: 'UNSUPPORTED',
+    4: 'FAILED',
+    5: 'IN_PROGRESS',
+}
+
 class CommandNode(Node):
 
     def __init__(self):
@@ -88,15 +118,15 @@ class CommandNode(Node):
         # Declare parameters
         self.declare_parameter('vehicle.id', 'UNKNOWN')
         self.declare_parameter('transport.mode', 'mqtt')
-        self.declare_parameter('mqtt.broker', 'localhost')
-        self.declare_parameter('mqtt.port', 1883)
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.base_topic', 'seano')
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.keepalive', 60)
         self.declare_parameter('mqtt.use_tls', True)
-        self.declare_parameter('mqtt.tls_insecure', True)
+        self.declare_parameter('mqtt.tls_insecure', False)
         self.declare_parameter('api.base_url', 'https://api.seano.cloud')
         self.declare_parameter('api.auth.type', 'none')
         self.declare_parameter('api.auth.api_key', '')
@@ -105,6 +135,11 @@ class CommandNode(Node):
         self.declare_parameter('api.queue_size', 100)
         self.declare_parameter('api.command_poll_interval_sec', 2.0)
         self.declare_parameter('api.command_poll_limit', 1)
+        self.declare_parameter('arming.require_gps_fix', True)
+        self.declare_parameter('arming.gps_topic', '/mavros/global_position/global')
+        self.declare_parameter('arming.gps_fix_min', 1)
+        self.declare_parameter('arming.gps_fix_timeout_sec', 2.0)
+        self.declare_parameter('arming.require_valid_coords', True)
 
         # Get parameters
         self.vehicle_id   = self.get_parameter('vehicle.id').value
@@ -126,6 +161,18 @@ class CommandNode(Node):
         self.use_tls      = bool(self.get_parameter('mqtt.use_tls').value)
         self.tls_insecure = bool(self.get_parameter('mqtt.tls_insecure').value)
 
+        self._require_gps_fix = bool(self.get_parameter('arming.require_gps_fix').value)
+        self._gps_topic = str(self.get_parameter('arming.gps_topic').value).strip() or \
+            '/mavros/global_position/global'
+        self._gps_fix_min = int(self.get_parameter('arming.gps_fix_min').value)
+        self._gps_fix_timeout_sec = max(
+            0.1,
+            float(self.get_parameter('arming.gps_fix_timeout_sec').value),
+        )
+        self._require_valid_coords = bool(
+            self.get_parameter('arming.require_valid_coords').value
+        )
+
         # MQTT topics
         self.command_topic = f"{self.base_topic}/{self.vehicle_id}/command"
         self.status_topic  = f"{self.base_topic}/{self.vehicle_id}/command/response"
@@ -142,7 +189,7 @@ class CommandNode(Node):
                 self.client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
             if self.use_tls:
-                self.client.tls_set(cert_reqs=ssl.CERT_NONE)
+                self.client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
                 self.client.tls_insecure_set(self.tls_insecure)
 
             self.client.reconnect_delay_set(min_delay=1, max_delay=30)
@@ -164,6 +211,46 @@ class CommandNode(Node):
         # ROS2 service clients for MAVROS
         self.command_client  = self.create_client(CommandLong, '/mavros/cmd/command')
         self.set_mode_client = self.create_client(SetMode, '/mavros/set_mode')
+
+        # MAVROS STATUSTEXT (pre-arm reason, etc.)
+        self._statustext_lock = threading.Lock()
+        self._last_statustext = ''
+        self._last_statustext_ts = 0.0
+        self.create_subscription(
+            StatusText,
+            '/mavros/statustext/recv',
+            self._statustext_callback,
+            10
+        )
+
+        # MAVROS state (armed flag)
+        self._state_lock = threading.Lock()
+        self._armed_state = None
+        self._state_ts = 0.0
+        self.create_subscription(
+            State,
+            '/mavros/state',
+            self._state_callback,
+            10
+        )
+
+        # GPS fix for pre-arm guard
+        self._gps_lock = threading.Lock()
+        self._gps_fix_status = None
+        self._gps_lat = None
+        self._gps_lon = None
+        self._gps_ts = 0.0
+        sensor_qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=10,
+        )
+        self.create_subscription(
+            NavSatFix,
+            self._gps_topic,
+            self._gps_callback,
+            sensor_qos,
+        )
 
         # ROS2 publisher for command status
         self.status_publisher = self.create_publisher(String, 'command_status', 10)
@@ -243,7 +330,10 @@ class CommandNode(Node):
 
         command_received_ts = _now_iso()
         command_type = str(payload.get('command', '')).strip().upper()
-        ctx_id = str(request_id or payload.get('request_id') or f"{command_type}_{command_received_ts}")
+        req_id = request_id or payload.get('request_id')
+        req_id = str(req_id).strip() if req_id is not None else ''
+        ctx_id = req_id or f"{command_type}_{command_received_ts}"
+        request_id_value = req_id or ctx_id
         self.get_logger().info(f"⚡ Received command: {command_type}")
 
         with self._cmd_log_lock:
@@ -251,12 +341,19 @@ class CommandNode(Node):
                 'command_received_timestamp': command_received_ts,
                 'vehicle_code': self.vehicle_id,
                 'command': command_type,
-                'request_id': request_id,
+                'request_id': request_id_value,
                 'source': source,
                 'mavlink_sent_timestamp': '',
             }
 
         if command_type == 'ARM':
+            if self._require_gps_fix and not self._gps_ready():
+                self._finalize_command(
+                    ctx_id,
+                    False,
+                    'Pre-arm check failed: GPS no fix',
+                )
+                return
             self.send_arm_command(True, force=False, ctx_id=ctx_id)
         elif command_type == 'FORCE_ARM':
             self.send_arm_command(True, force=True, ctx_id=ctx_id)
@@ -323,12 +420,22 @@ class CommandNode(Node):
     def command_response_callback(self, future, command_name, ctx_id):
         try:
             response = future.result()
-            if response.success:
-                self.get_logger().info(f"{command_name} successful")
-                self._finalize_command(ctx_id, True, f'{command_name} successful')
+            success = bool(getattr(response, 'success', False))
+            if success:
+                if command_name in {'ARM', 'FORCE_ARM', 'DISARM', 'FORCE_DISARM'}:
+                    self._confirm_arm_state_async(command_name, ctx_id)
+                else:
+                    self.get_logger().info(f"{command_name} successful")
+                    self._finalize_command(ctx_id, True, f'{command_name} successful')
             else:
-                msg = f'{command_name} failed: code {response.result}'
-                self.get_logger().error(f"{command_name} failed: result={response.result}")
+                reason = self._recent_statustext()
+                result_code = int(getattr(response, 'result', -1))
+                code_label = _MAV_RESULT_LABELS.get(result_code, f'code {result_code}')
+                if reason:
+                    msg = f'{command_name} failed: {reason}'
+                else:
+                    msg = f'{command_name} failed: {code_label}'
+                self.get_logger().error(f"{command_name} failed: result={result_code}")
                 self._finalize_command(ctx_id, False, msg)
         except Exception as e:
             self.get_logger().error(f"Service call failed: {e}")
@@ -349,14 +456,15 @@ class CommandNode(Node):
 
     def _finalize_command(self, ctx_id, success: bool, message: str):
         response_ts = _now_iso()
+        ack_ts = _now_iso_utc()
         ctx = {}
         if ctx_id is not None:
             with self._cmd_log_lock:
                 ctx = self._cmd_log_ctx.pop(ctx_id, {})
 
-        self.publish_status(message, success)
+        self.publish_status(ctx, message, success, ack_ts)
         self._write_command_log_from_ctx(ctx, response_ts, success, message)
-        self._send_api_ack(ctx, success, message, response_ts)
+        self._send_api_ack(ctx, success, message, ack_ts)
 
     def _write_command_log_from_ctx(self, ctx: dict, response_ts: str, success: bool, message: str):
         result = 'SUCCESS' if success else 'FAILED'
@@ -391,7 +499,7 @@ class CommandNode(Node):
         }
         self._api_enqueue('POST', '/command-acks', payload)
 
-    def publish_status(self, message, success):
+    def publish_status(self, ctx: dict, message: str, success: bool, ack_ts: str):
         data = json.dumps({
             "status": "success" if success else "error",
             "message": message,
@@ -401,7 +509,94 @@ class CommandNode(Node):
         msg.data = data
         self.status_publisher.publish(msg)
         if self.client is not None:
-            self.client.publish(self.status_topic, data, qos=self.qos)
+            request_id = ctx.get('request_id') if ctx else None
+            command_name = ctx.get('command') if ctx else None
+            if request_id and command_name:
+                ack_payload = {
+                    'request_id': request_id,
+                    'command': command_name,
+                    'status': 'ok' if success else 'error',
+                    'message': message,
+                    'timestamp': ack_ts,
+                }
+                self.client.publish(
+                    self.status_topic,
+                    json.dumps(ack_payload),
+                    qos=self.qos,
+                )
+
+    def _statustext_callback(self, msg: StatusText) -> None:
+        text = getattr(msg, 'text', '')
+        if not text:
+            return
+        with self._statustext_lock:
+            self._last_statustext = str(text)
+            self._last_statustext_ts = time.monotonic()
+
+    def _state_callback(self, msg: State) -> None:
+        with self._state_lock:
+            self._armed_state = bool(msg.armed)
+            self._state_ts = time.monotonic()
+
+    def _gps_callback(self, msg: NavSatFix) -> None:
+        with self._gps_lock:
+            self._gps_fix_status = int(msg.status.status)
+            self._gps_lat = msg.latitude
+            self._gps_lon = msg.longitude
+            self._gps_ts = time.monotonic()
+
+    def _recent_statustext(self, max_age_sec: float = 5.0) -> str:
+        with self._statustext_lock:
+            if not self._last_statustext:
+                return ''
+            if (time.monotonic() - self._last_statustext_ts) > max_age_sec:
+                return ''
+            return self._last_statustext
+
+    def _gps_ready(self) -> bool:
+        now = time.monotonic()
+        with self._gps_lock:
+            fix = self._gps_fix_status
+            lat = self._gps_lat
+            lon = self._gps_lon
+            ts = self._gps_ts
+
+        if fix is None:
+            return False
+        if (now - ts) > self._gps_fix_timeout_sec:
+            return False
+        if fix < self._gps_fix_min:
+            return False
+        if self._require_valid_coords and not _coords_valid(lat, lon):
+            return False
+        return True
+
+    def _confirm_arm_state_async(self, command_name: str, ctx_id: str, timeout_sec: float = 4.0):
+        thread = threading.Thread(
+            target=self._confirm_arm_state,
+            args=(command_name, ctx_id, timeout_sec),
+            daemon=True,
+        )
+        thread.start()
+
+    def _confirm_arm_state(self, command_name: str, ctx_id: str, timeout_sec: float):
+        desired = command_name in {'ARM', 'FORCE_ARM'}
+        start = time.monotonic()
+        while (time.monotonic() - start) < timeout_sec:
+            with self._state_lock:
+                armed = self._armed_state
+            if armed is not None and armed == desired:
+                self.get_logger().info(f"{command_name} successful")
+                self._finalize_command(ctx_id, True, f'{command_name} successful')
+                return
+            time.sleep(0.2)
+
+        reason = self._recent_statustext()
+        if reason:
+            msg = f'{command_name} failed: {reason}'
+        else:
+            msg = f'{command_name} failed: armed state not reached'
+        self._finalize_command(ctx_id, False, msg)
 
     def _api_headers(self):
         headers = {
