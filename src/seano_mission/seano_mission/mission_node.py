@@ -29,7 +29,7 @@ class MissionNode(Node):
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.keepalive', 60)
         self.declare_parameter('mqtt.use_tls', True)
-        self.declare_parameter('mqtt.tls_insecure', True)
+        self.declare_parameter('mqtt.tls_insecure', False)
         self.declare_parameter('mission.auto_set_home_from_first_waypoint', True)
         self.declare_parameter('mission.auto_append_rtl_on_complete', True)
 
@@ -189,7 +189,7 @@ class MissionNode(Node):
             client.username_pw_set(self.mqtt_username, self.mqtt_password)
 
         if self.mqtt_use_tls:
-            client.tls_set(cert_reqs=ssl.CERT_NONE)
+            client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
             client.tls_insecure_set(self.mqtt_tls_insecure)
 
         client.reconnect_delay_set(min_delay=1, max_delay=30)

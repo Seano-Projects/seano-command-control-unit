@@ -28,15 +28,15 @@ class SeanoBatteryDummyNode(Node):
 
         # Shared identity and MQTT config
         self.declare_parameter('vehicle.id', 'UNKNOWN')
-        self.declare_parameter('mqtt.broker', 'localhost')
-        self.declare_parameter('mqtt.port', 1883)
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.base_topic', 'seano')
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.keepalive', 60)
         self.declare_parameter('mqtt.use_tls', True)
-        self.declare_parameter('mqtt.tls_insecure', True)
+        self.declare_parameter('mqtt.tls_insecure', False)
 
         self.publish_interval = float(self.get_parameter('failsafe.battery_dummy.publish_interval').value)
         self.battery_id = int(self.get_parameter('failsafe.battery_dummy.battery_id').value)

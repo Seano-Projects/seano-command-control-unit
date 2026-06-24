@@ -44,15 +44,15 @@ class SeanoBatteryNode(Node):
         self.declare_parameter('failsafe.battery.max_current', 5.8)
 
         self.declare_parameter('vehicle.id', 'UNKNOWN')
-        self.declare_parameter('mqtt.broker', 'localhost')
-        self.declare_parameter('mqtt.port', 1883)
+        self.declare_parameter('mqtt.broker', 'mqtt.seano.cloud')
+        self.declare_parameter('mqtt.port', 8883)
         self.declare_parameter('mqtt.username', '')
         self.declare_parameter('mqtt.password', '')
         self.declare_parameter('mqtt.base_topic', 'seano')
         self.declare_parameter('mqtt.qos', 1)
         self.declare_parameter('mqtt.keepalive', 60)
         self.declare_parameter('mqtt.use_tls', True)
-        self.declare_parameter('mqtt.tls_insecure', True)
+        self.declare_parameter('mqtt.tls_insecure', False)
         
         self.serial_port = self.get_parameter('failsafe.battery.serial_port').value
         self.baudrate = self.get_parameter('failsafe.battery.baudrate').value
