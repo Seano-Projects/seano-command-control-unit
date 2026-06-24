@@ -81,7 +81,6 @@ ros2 run seano_oceanography ctd_sensor_node --ros-args --params-file src/seano_s
 
 # Node lain (dummy/simulasi)
 ros2 run seano_oceanography adcp_sensor_node
-ros2 run seano_oceanography sbes_sensor_node
 ```
 
 ### Package `seano_telemetry`

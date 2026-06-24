@@ -17,7 +17,8 @@ seano/{vehicle_code}/status                   # LWT online/offline
 seano/{vehicle_code}/mission/waypoint_reached # mission progress
 seano/{vehicle_code}/antitheft/alert          # alert
 seano/{vehicle_code}/failsafe/alert           # alert
-seano/{vehicle_code}/ack                      # USV replies ACK here
+seano/{vehicle_code}/command/response         # command response
+seano/{vehicle_code}/waypoint/response        # waypoint upload response
 ```
 
 **WebSocket stream yang menerima hasilnya (ke web):**
@@ -119,6 +120,26 @@ Topic: `seano/USV-001/mission/waypoint_reached`
 }
 ```
 
+Topic: `seano/USV-001/command/response`
+
+```json
+{
+  "status": "success",
+  "message": "Mode changed to AUTO",
+  "vehicle_id": "USV-001"
+}
+```
+
+Topic: `seano/USV-001/waypoint/response`
+
+```json
+{
+  "status": "success",
+  "message": "Upload 12 waypoint berhasil",
+  "vehicle_id": "USV-001"
+}
+```
+
 Topic: `seano/USV-001/antitheft/alert`
 
 ```json
@@ -142,17 +163,6 @@ Topic: `seano/USV-001/failsafe/alert`
   "source": "USV",
   "latitude": -6.2088,
   "longitude": 106.8456
-}
-```
-
-Topic: `seano/USV-001/ack`
-
-```json
-{
-  "request_id": "c2e5b7f6-9d2e-4b26-8b0c-2d9802b12b9a",
-  "command": "AUTO",
-  "status": "ok",
-  "message": "Mode set to AUTO"
 }
 ```
 
@@ -349,7 +359,7 @@ POST https://api.seano.cloud/alerts
 }
 ```
 
-```json
+````json
 PUT https://api.seano.cloud/missions/12/progress
 {
   "progress": 25.0,
@@ -378,7 +388,7 @@ GET https://api.seano.cloud/commands/pending?vehicle_code=USV-001&limit=1
   ],
   "count": 1
 }
-```
+````
 
 ```json
 POST https://api.seano.cloud/waypoint-acks
@@ -390,4 +400,7 @@ POST https://api.seano.cloud/waypoint-acks
   "timestamp": "2025-01-01T08:31:40Z"
 }
 ```
+
+```
+
 ```
