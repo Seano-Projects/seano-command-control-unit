@@ -1,3 +1,0 @@
-command_received_timestamp,vehicle_code,command,mavlink_sent_timestamp,execution_result,execution_message,command_response_timestamp,duration_ms
-2026-04-15T16:29:57.643,USV-001,ARM,2026-04-15T16:29:57.653,FAILED,ARM failed: code 4,2026-04-15T16:29:57.680,37
-2026-04-15T16:29:59.261,USV-001,FORCE_ARM,2026-04-15T16:29:59.270,SUCCESS,FORCE_ARM successful,2026-04-15T16:29:59.301,40

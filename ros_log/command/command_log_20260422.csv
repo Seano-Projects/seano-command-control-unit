@@ -1,3 +1,0 @@
-command_received_timestamp,vehicle_code,command,mavlink_sent_timestamp,execution_result,execution_message,command_response_timestamp,duration_ms
-2026-04-22T16:38:21.517,USV-001,AUTO,,FAILED,MAVROS set_mode service unavailable,2026-04-22T16:38:26.538,5021
-2026-04-22T16:45:27.371,USV-001,AUTO,,FAILED,MAVROS set_mode service unavailable,2026-04-22T16:45:32.413,5042

@@ -1,3 +1,0 @@
-waypoint_received_timestamp,vehicle_code,waypoint_count,set_home_from_first,mavlink_upload_start,mavlink_upload_end,execution_result,execution_message,status_publish_timestamp,duration_ms
-2026-04-10T14:34:43.375,USV-001,14,True,2026-04-10T14:34:43.414,2026-04-10T14:34:43.725,SUCCESS,Upload 14 waypoint berhasil,2026-04-10T14:34:43.729,354
-2026-04-10T14:35:17.415,USV-001,14,True,2026-04-10T14:35:17.452,2026-04-10T14:35:17.761,SUCCESS,Upload 14 waypoint berhasil,2026-04-10T14:35:17.766,351
